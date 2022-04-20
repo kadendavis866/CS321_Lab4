@@ -1,12 +1,12 @@
 
 
 public class BTreeNode {
-    private TreeObject[] node;
-    private BTreeNode parent;
-    private BTreeNode[] children;
-    private int n;
-    private boolean leaf;
-    private int t;
+    protected TreeObject[] node;
+    protected BTreeNode parent;
+    protected BTreeNode[] children;
+    protected int n;
+    protected boolean leaf;
+    protected int t;
 
     public BTreeNode(int t, boolean leaf){
         this.t = t;
@@ -15,6 +15,4 @@ public class BTreeNode {
         this.children = new BTreeNode[2 * t];
         this.n = 0;
     }
-
-    
 }
