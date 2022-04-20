@@ -1,3 +1,6 @@
+import java.io.*;
+import java.util.*;
+
 public class GeneBankCreateBTree {
 
     private static final byte A = 0;
@@ -57,5 +60,36 @@ public class GeneBankCreateBTree {
         long l = dnaToLong(sequence);
         System.out.println(l);
         System.out.println(longToDna(l));
+    }
+
+    public void readFile(File file, BTree bTree) throws FileNotFoundException {
+        Scanner scanner = new Scanner(file);
+        String line;
+        String[] dnaLine;
+        while (scanner.hasNextLine()) {
+            line = scanner.nextLine();
+
+            //find and parse the next DNA sequence in the file
+            if (line.trim().equals("ORIGIN")) {
+                StringBuilder sb = new StringBuilder("");
+                line = scanner.nextLine();
+                while (!line.trim().equals("//")) {
+                    dnaLine = line.split(" ");
+                    for (int i = 1; i < dnaLine.length; i++) { //start at 1 because the first index always contains a number
+                        if (!dnaLine[i].contains("n")) {
+                            sb.append(dnaLine[i]);
+                        }
+                    }
+                }
+                String dnaSequence = sb.toString();
+
+                //insert the sequence into the BTree
+                long binarySequence;
+                for (int i = 0; i <= dnaSequence.length() - sequenceLength; i++) {
+                    binarySequence = dnaToLong(dnaSequence.substring(i, i + sequenceLength));
+                    bTree.insert(new TreeObject(binarySequence));
+                }
+            }
+        }
     }
 }
