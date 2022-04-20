@@ -61,5 +61,36 @@ public class BTree {
     }
 
     public void insertNonFull(BTreeNode nonFull, TreeObject key) {
+
+        // i = index to insert key, starts at end of node
+        int i = nonFull.n - 1;
+
+        // If this is a leaf node, insert
+        if (nonFull.leaf) {
+            // shift keys forward until the location to insert new key is found
+            while (i >= 0 && nonFull.node[i].compareTo(key) > 0) {
+                nonFull.node[i + 1] = nonFull.node[i];
+                i--;
+            }
+            // Insert the new key at found location
+            nonFull.node[i + 1] = key;
+            nonFull.n = nonFull.n + 1;
+
+            // if this is not a leaf node, continue searching
+        } else {
+            // Find the correct child
+            while (i >= 0 && nonFull.node[i].compareTo(key) > 0) i--;
+
+            // if child is full, split it
+            if (nonFull.children[i + 1].n == 2 * t - 1) {
+                splitChild(nonFull, i + 1);
+
+                // update i if necessary
+                if (nonFull.node[i + 1].compareTo(key) < 0) i++;
+            }
+            // calls the method recursively until a leaf node is found
+            insertNonFull(nonFull.children[i + 1], key);
+        }
+
     }
 }
