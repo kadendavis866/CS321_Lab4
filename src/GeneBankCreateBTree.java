@@ -10,16 +10,23 @@ public class GeneBankCreateBTree {
     private static final byte G = 3;
 
     private final int SEQUENCE_LENGTH;
+    private final int TREE_DEGREE;
 
-    public GeneBankCreateBTree(int sequenceLength) {
-        this.SEQUENCE_LENGTH = sequenceLength;
+    private final BTree bTree;
+
+    public GeneBankCreateBTree(int sequenceLength, int treeDegree) {
+        SEQUENCE_LENGTH = sequenceLength;
+        TREE_DEGREE = treeDegree;
+        bTree = new BTree(TREE_DEGREE / 2);
     }
 
     public static void main(String[] args) {
-        int sequenceLength = 5; // replace with arg[3]
-        GeneBankCreateBTree treeCreator = new GeneBankCreateBTree(sequenceLength);
-
-
+        int sequenceLength = 5; // replace with args[3]
+        int treeDegree = 8; // replace with args[1]
+        GeneBankCreateBTree treeCreator = new GeneBankCreateBTree(sequenceLength, treeDegree);
+        treeCreator.readFile(new File("BTree/data/test1.gbk"));
+        // just a line for me to put a breakpoint on for debugging
+        System.out.println();
     }
 
     private long dnaToLong(String sequence) {
@@ -65,33 +72,37 @@ public class GeneBankCreateBTree {
         return String.valueOf(chars);
     }
 
-    public void readFile(File file, BTree bTree) throws FileNotFoundException {
-        Scanner scanner = new Scanner(file);
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
+    public void readFile(File file) {
+        // moved try block here to prevent resource leak on scanner
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
 
-            //find and parse the next DNA sequence in the file
-            if (line.trim().equals("ORIGIN")) {
-                StringBuilder sb = new StringBuilder();
-                line = scanner.nextLine();
-                while (!line.trim().equals("//")) {
-                    String[] dnaLine = line.split(" ");
-                    for (int i = 1; i < dnaLine.length; i++) { //start at 1 because the first index always contains a number
-                        sb.append(dnaLine[i]);
-                    }
+                //find and parse the next DNA sequence in the file
+                if (line.trim().equals("ORIGIN")) {
+                    StringBuilder sb = new StringBuilder();
                     line = scanner.nextLine();
-                }
-                String dnaSequence = sb.toString();
+                    while (!line.trim().equals("//")) {
+                        String[] dnaLine = line.split(" ");
+                        for (int i = 1; i < dnaLine.length; i++) { //start at 1 because the first index always contains a number
+                            sb.append(dnaLine[i]);
+                        }
+                        line = scanner.nextLine();
+                    }
+                    String dnaSequence = sb.toString();
 
-                //insert the sequence into the BTree
-                for (int i = 0; i <= dnaSequence.length() - SEQUENCE_LENGTH; i++) {
-                    String substring = dnaSequence.substring(i, i + SEQUENCE_LENGTH);
-                    if (!substring.contains("n")) {
-                        long binarySequence = dnaToLong(substring);
-                        bTree.insert(new TreeObject(binarySequence));
+                    //insert the sequence into the BTree
+                    for (int i = 0; i <= dnaSequence.length() - SEQUENCE_LENGTH; i++) {
+                        String substring = dnaSequence.substring(i, i + SEQUENCE_LENGTH);
+                        if (!substring.contains("n")) {
+                            long binarySequence = dnaToLong(substring);
+                            bTree.insert(new TreeObject(binarySequence));
+                        }
                     }
                 }
             }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }
