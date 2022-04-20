@@ -1,5 +1,6 @@
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 public class GeneBankCreateBTree {
 
@@ -8,22 +9,33 @@ public class GeneBankCreateBTree {
     private static final byte C = 2;
     private static final byte G = 3;
 
-    private static int sequenceLength;
+    private final int SEQUENCE_LENGTH;
 
-    private static long dnaToLong(String sequence){
+    public GeneBankCreateBTree(int sequenceLength) {
+        this.SEQUENCE_LENGTH = sequenceLength;
+    }
+
+    public static void main(String[] args) {
+        int sequenceLength = 5; // replace with arg[3]
+        GeneBankCreateBTree treeCreator = new GeneBankCreateBTree(sequenceLength);
+
+
+    }
+
+    private long dnaToLong(String sequence) {
         long l = 0;
-        for(char c : sequence.toCharArray()){
-            switch (c) {
-                case 'A':
+        for (char c : sequence.toCharArray()) {
+            switch (Character.toLowerCase(c)) {
+                case 'a':
                     l += A;
                     break;
-                case 'T':
+                case 't':
                     l += T;
                     break;
-                case 'C':
+                case 'c':
                     l += C;
                     break;
-                case 'G':
+                case 'g':
                     l += G;
             }
             l <<= 2;
@@ -32,10 +44,10 @@ public class GeneBankCreateBTree {
         return l;
     }
 
-    private static String longToDna(long l){
-        char[] chars = new char[sequenceLength];
-        for(int i = sequenceLength - 1; i >=0; i--){
-            switch ((byte) (l % 4)){
+    private String longToDna(long l) {
+        char[] chars = new char[SEQUENCE_LENGTH];
+        for (int i = SEQUENCE_LENGTH - 1; i >= 0; i--) {
+            switch ((byte) (l % 4)) {
                 case A:
                     chars[i] = 'A';
                     break;
@@ -53,15 +65,6 @@ public class GeneBankCreateBTree {
         return String.valueOf(chars);
     }
 
-    public static void main(String[] args) {
-        String sequence = "AGTCGGCTAGAGTCGAGTCGGCTAG";
-        sequenceLength = sequence.length();
-
-        long l = dnaToLong(sequence);
-        System.out.println(l);
-        System.out.println(longToDna(l));
-    }
-
     public void readFile(File file, BTree bTree) throws FileNotFoundException {
         Scanner scanner = new Scanner(file);
         while (scanner.hasNextLine()) {
@@ -69,7 +72,7 @@ public class GeneBankCreateBTree {
 
             //find and parse the next DNA sequence in the file
             if (line.trim().equals("ORIGIN")) {
-                StringBuilder sb = new StringBuilder("");
+                StringBuilder sb = new StringBuilder();
                 line = scanner.nextLine();
                 while (!line.trim().equals("//")) {
                     String[] dnaLine = line.split(" ");
@@ -81,9 +84,10 @@ public class GeneBankCreateBTree {
                 String dnaSequence = sb.toString();
 
                 //insert the sequence into the BTree
-                for (int i = 0; i <= dnaSequence.length() - sequenceLength; i++) {
-                    if (!dnaSequence.substring(i, i + sequenceLength).contains("n")) {
-                        long binarySequence = dnaToLong(dnaSequence.substring(i, i + sequenceLength));
+                for (int i = 0; i <= dnaSequence.length() - SEQUENCE_LENGTH; i++) {
+                    String substring = dnaSequence.substring(i, i + SEQUENCE_LENGTH);
+                    if (!substring.contains("n")) {
+                        long binarySequence = dnaToLong(substring);
                         bTree.insert(new TreeObject(binarySequence));
                     }
                 }
