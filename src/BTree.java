@@ -13,15 +13,20 @@ public class BTree {
             root.node[0] = k;
             root.n = 1;
         } else {
-            BTreeNode r = root;
-            if (r.n == (2 * t - 1)) {
-                BTreeNode s = new BTreeNode(t, false);
-                root = s;
-                s.children[0] = r;
-                splitChild(s, 0);
-                insertNonFull(s, k);
-            } else {
-                insertNonFull(r, k);
+            TreeObject object = get(k.getSubstring());
+            if (object == null) {
+                BTreeNode r = root;
+                if (r.n == (2 * t - 1)) {
+                    BTreeNode s = new BTreeNode(t, false);
+                    root = s;
+                    s.children[0] = r;
+                    splitChild(s, 0);
+                    insertNonFull(s, k);
+                } else {
+                    insertNonFull(r, k);
+                }
+            } else{
+                object.incrementFrequency();
             }
         }
     }
@@ -92,5 +97,21 @@ public class BTree {
             insertNonFull(nonFull.children[i + 1], key);
         }
 
+    }
+
+    public TreeObject get(long key){
+        BTreeNode node = root;
+        while(node != null) {
+            int i = 0;
+            for (; i < node.n; i++){
+                long k = node.node[i].getSubstring();
+                if (key == k) return node.node[i];
+                if (key < k){
+                    break;
+                }
+            }
+            node = node.children[i];
+        }
+        return null;
     }
 }

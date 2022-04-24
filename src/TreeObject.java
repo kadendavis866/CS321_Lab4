@@ -1,10 +1,10 @@
 public class TreeObject implements Comparable<TreeObject> {
 
-    long substring;
-    int frequency;
+    private final long substring;
+    private int frequency;
 
     public TreeObject(long substring) {//Passed in substring
-        frequency = 0;
+        frequency = 1;
         this.substring = substring;
     }
 
@@ -18,5 +18,17 @@ public class TreeObject implements Comparable<TreeObject> {
             return -1;
         }
         return 0;
+    }
+
+    public long getSubstring() {
+        return substring;
+    }
+
+    public int getFrequency() {
+        return frequency;
+    }
+
+    public void incrementFrequency() {
+        frequency++;
     }
 }
