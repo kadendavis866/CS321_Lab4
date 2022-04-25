@@ -19,18 +19,31 @@ public class GeneBankCreateBTree {
         bTree = new BTree(treeDegree, sourceFile + ".btree.data." + SEQUENCE_LENGTH + "." + treeDegree);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         int sequenceLength = 5; // replace with args[3]
         int treeDegree = 8; // replace with args[1]
         GeneBankCreateBTree treeCreator;
         try {
-            treeCreator = new GeneBankCreateBTree("BTree/data/test1.gbk", sequenceLength, treeDegree);
+            treeCreator = new GeneBankCreateBTree("BTree/data/test.gbk", sequenceLength, treeDegree);
             treeCreator.readFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
         // just a line for me to put a breakpoint on for debugging
         System.out.println();
+
+        // stuff for testing writing
+        /*DiskReadWrite disk = new DiskReadWrite(new File("testOut"), BTree.METADATA_SIZE, BTreeNode.getDiskSize(6));
+        disk.writeMetadata(0, 6);
+        BTreeNode root = new BTreeNode(3, true);
+        root.n = 5;
+        root.keys[0] = new TreeObject(216542618, 1);
+        root.keys[1] = new TreeObject(21618, 1);
+        root.keys[2] = new TreeObject(216418, 2);
+        root.keys[3] = new TreeObject(618, 13);
+        root.keys[4] = new TreeObject(2161, 1);
+        disk.writeNode(root);
+        disk.setRoot(root.address);*/
     }
 
     private long dnaToLong(String sequence) {

@@ -14,6 +14,6 @@ public class BTreeNode {
     }
 
     public static int getDiskSize(int degree) {
-        return Integer.BYTES * 2 + 1 + TreeObject.DISK_SIZE * (degree - 1) + Long.BYTES * degree;
+        return Integer.BYTES + 1 + TreeObject.DISK_SIZE * (degree - 1) + Long.BYTES * degree;
     }
 }

@@ -3,7 +3,7 @@ import java.io.IOException;
 
 public class BTree {
 
-    public static int METADATA_SIZE;
+    public static int METADATA_SIZE = Integer.BYTES + Long.BYTES;
     public static int NODE_SIZE;
     private final int t; // min children
     private final int m; // degree/max children
@@ -13,7 +13,6 @@ public class BTree {
     public BTree(int degree, String fileName) throws IOException {
         m = degree;
         t = degree / 2;
-        METADATA_SIZE = Integer.BYTES + Long.BYTES;
         NODE_SIZE = BTreeNode.getDiskSize(m);
         diskrw = new DiskReadWrite(new File(fileName), METADATA_SIZE, NODE_SIZE);
         diskrw.writeMetadata(0, m);
@@ -37,8 +36,8 @@ public class BTree {
                     diskrw.writeNode(s);
                     root = s;
                     diskrw.setRoot(s.address);
-                    splitChild(s, 0);
-                    insertNonFull(s, k);
+                    splitChild(root, 0);
+                    insertNonFull(root, k);
                 } else {
                     insertNonFull(root, k);
                 }

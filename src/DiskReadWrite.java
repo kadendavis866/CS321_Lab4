@@ -11,6 +11,7 @@ public class DiskReadWrite {
     private final FileChannel file;
     private final ByteBuffer buffer;
     private long endAddress;
+    private int degree;
 
 
     public DiskReadWrite(File file, int metadataSize, int nodeSize) throws IOException {
@@ -18,6 +19,7 @@ public class DiskReadWrite {
         NODE_SIZE = nodeSize;
         buffer = ByteBuffer.allocateDirect(nodeSize);
         endAddress = 0;
+        degree = 0;
         file.createNewFile();
         RandomAccessFile dataFile = new RandomAccessFile(file, "rw");
         this.file = dataFile.getChannel();
@@ -35,6 +37,7 @@ public class DiskReadWrite {
         tmpBuffer.flip();
         file.write(tmpBuffer);
         endAddress += METADATA_SIZE;
+        this.degree = degree;
     }
 
     private void writeNode(BTreeNode node, long address) throws IOException {
@@ -48,14 +51,23 @@ public class DiskReadWrite {
         buffer.put(leaf);
 
         //keys
-        for (int i = 0; i < node.n; i++) {
-            buffer.putLong(node.keys[i].substring);
-            buffer.putInt(node.keys[i].frequency);
+        for (int i = 0; i < degree - 1; i++) {
+            if (i < node.n) {
+                buffer.putLong(node.keys[i].substring);
+                buffer.putInt(node.keys[i].frequency);
+            }else{
+                buffer.putLong(0);
+                buffer.putInt(0);
+            }
         }
 
         //children
-        for (int i = 0; i <= node.n; i++) {
-            buffer.putLong(node.children[i]);
+        for (int i = 0; i < degree; i++) {
+            if (i < node.n + 1) {
+                buffer.putLong(node.children[i]);
+            } else {
+                buffer.putLong(0);
+            }
         }
 
         buffer.flip();
@@ -64,8 +76,8 @@ public class DiskReadWrite {
 
     public void writeNode(BTreeNode node) throws IOException {
         node.address = endAddress;
-        endAddress += NODE_SIZE;
         writeNode(node, endAddress);
+        endAddress += NODE_SIZE;
     }
 
     public void updateNode(BTreeNode node) throws IOException {
@@ -84,7 +96,7 @@ public class DiskReadWrite {
         int n = buffer.getInt();
         byte leaf = buffer.get();
 
-        BTreeNode node = new BTreeNode(8, leaf == 1);
+        BTreeNode node = new BTreeNode(degree/2, leaf == 1);
         node.address = address;
         node.n = n;
 
