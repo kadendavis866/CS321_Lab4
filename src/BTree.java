@@ -7,8 +7,8 @@ public class BTree {
     public static int NODE_SIZE;
     private final int t; // min children
     private final int m; // degree/max children
-    private BTreeNode root;
     private final DiskReadWrite diskrw;
+    private BTreeNode root;
 
     public BTree(int degree, String fileName) throws IOException {
         m = degree;
@@ -123,6 +123,8 @@ public class BTree {
                 // go to next child if necessary
                 if (nonFull.keys[i + 1].compareTo(key) < 0) {
                     child = diskrw.readNode(nonFull.children[i + 2]);
+                } else {
+                    child = diskrw.readNode(nonFull.children[i + 1]);
                 }
             }
             // calls the method recursively until a leaf node is found
@@ -153,5 +155,9 @@ public class BTree {
             if (node.keys[i].substring == key) return node.keys[i];
         }
         return null;
+    }
+
+    public void dump(String filename, int sequenceLength) {
+        diskrw.dump(filename, sequenceLength);
     }
 }

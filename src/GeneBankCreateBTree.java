@@ -5,92 +5,34 @@ import java.util.Scanner;
 
 public class GeneBankCreateBTree {
 
-    private static final byte A = 0;
-    private static final byte T = 1;
-    private static final byte C = 2;
-    private static final byte G = 3;
+
     private final int SEQUENCE_LENGTH;
-    private final String sourceFile;
+    private final File sourceFile;
     private final BTree bTree;
 
-    public GeneBankCreateBTree(String sourceFile, int sequenceLength, int treeDegree) throws IOException {
+    public GeneBankCreateBTree(File sourceFile, int sequenceLength, int treeDegree) throws IOException {
         this.sourceFile = sourceFile;
         SEQUENCE_LENGTH = sequenceLength;
-        bTree = new BTree(treeDegree, sourceFile + ".btree.data." + SEQUENCE_LENGTH + "." + treeDegree);
+        bTree = new BTree(treeDegree, sourceFile.getName() + ".btree.data." + SEQUENCE_LENGTH + "." + treeDegree);
     }
 
-    public static void main(String[] args) throws IOException {
-        int sequenceLength = 5; // replace with args[3]
-        int treeDegree = 8; // replace with args[1]
+    public static void main(String[] args) {
+        int sequenceLength = 6; // replace with args[3]
+        int treeDegree = 26; // replace with args[1], with current structure 26 should be a good size
         GeneBankCreateBTree treeCreator;
         try {
-            treeCreator = new GeneBankCreateBTree("BTree/data/test.gbk", sequenceLength, treeDegree);
+            File sourceFile = new File("BTree/data/test3.gbk");
+            treeCreator = new GeneBankCreateBTree(sourceFile, sequenceLength, treeDegree);
             treeCreator.readFile();
+            treeCreator.createDumpFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // just a line for me to put a breakpoint on for debugging
-        System.out.println();
-
-        // stuff for testing writing
-        /*DiskReadWrite disk = new DiskReadWrite(new File("testOut"), BTree.METADATA_SIZE, BTreeNode.getDiskSize(6));
-        disk.writeMetadata(0, 6);
-        BTreeNode root = new BTreeNode(3, true);
-        root.n = 5;
-        root.keys[0] = new TreeObject(216542618, 1);
-        root.keys[1] = new TreeObject(21618, 1);
-        root.keys[2] = new TreeObject(216418, 2);
-        root.keys[3] = new TreeObject(618, 13);
-        root.keys[4] = new TreeObject(2161, 1);
-        disk.writeNode(root);
-        disk.setRoot(root.address);*/
     }
 
-    private long dnaToLong(String sequence) {
-        long l = 0;
-        for (char c : sequence.toCharArray()) {
-            switch (Character.toLowerCase(c)) {
-                case 'a':
-                    l += A;
-                    break;
-                case 't':
-                    l += T;
-                    break;
-                case 'c':
-                    l += C;
-                    break;
-                case 'g':
-                    l += G;
-            }
-            l <<= 2;
-        }
-        l >>= 2;
-        return l;
-    }
-
-    private String longToDna(long l) {
-        char[] chars = new char[SEQUENCE_LENGTH];
-        for (int i = SEQUENCE_LENGTH - 1; i >= 0; i--) {
-            switch ((byte) (l % 4)) {
-                case A:
-                    chars[i] = 'A';
-                    break;
-                case T:
-                    chars[i] = 'T';
-                    break;
-                case C:
-                    chars[i] = 'C';
-                    break;
-                case G:
-                    chars[i] = 'G';
-            }
-            l >>= 2;
-        }
-        return String.valueOf(chars);
-    }
 
     public void readFile() throws IOException {
-        try (Scanner scanner = new Scanner(new File(sourceFile))) {
+        try (Scanner scanner = new Scanner(sourceFile)) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
 
@@ -111,7 +53,7 @@ public class GeneBankCreateBTree {
                     int index = 0; //ending index of the window
                     int count = 0;
                     while (count != SEQUENCE_LENGTH && index < dnaSequence.length()) {
-                    //find a window to start with that doesn't contain an 'n'
+                        //find a window to start with that doesn't contain an 'n'
                         if (dnaSequence.charAt(index) == 'n') {
                             count = 0;
                         } else {
@@ -120,12 +62,12 @@ public class GeneBankCreateBTree {
                         index++;
                     }
                     String substring = dnaSequence.substring(index - SEQUENCE_LENGTH, index);
-                    long binarySequence = dnaToLong(substring);
+                    long binarySequence = DNAConversion.dnaToLong(substring);
                     bTree.insert(new TreeObject(binarySequence)); //insert the starting window
                     while (index < dnaSequence.length()) {
                         if (dnaSequence.charAt(index) == 'n') { //an 'n' is found
                             while (dnaSequence.charAt(index) == 'n' && index < dnaSequence.length()) {
-                            //find next index that is not an 'n'
+                                //find next index that is not an 'n'
                                 index++;
                             }
                             if (index == dnaSequence.length()) { //dnaSequence ends in an 'n'
@@ -133,7 +75,7 @@ public class GeneBankCreateBTree {
                             }
                             count = 0;
                             while (count != SEQUENCE_LENGTH && index < dnaSequence.length()) {
-                            //again find a valid window to continue with
+                                //again find a valid window to continue with
                                 if (dnaSequence.charAt(index) == 'n') {
                                     count = 0;
                                 } else {
@@ -149,7 +91,7 @@ public class GeneBankCreateBTree {
                         }
                         //index will always make a valid window at this point
                         substring = dnaSequence.substring(index - SEQUENCE_LENGTH, index);
-                        binarySequence = dnaToLong(substring);
+                        binarySequence = DNAConversion.dnaToLong(substring);
                         bTree.insert(new TreeObject(binarySequence));
                     }
                 }
@@ -158,4 +100,9 @@ public class GeneBankCreateBTree {
             e.printStackTrace();
         }
     }
+
+    public void createDumpFile() {
+        bTree.dump(sourceFile.getName() + ".btree.dump." + SEQUENCE_LENGTH, SEQUENCE_LENGTH);
+    }
+
 }
