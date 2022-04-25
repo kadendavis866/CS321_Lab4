@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class GeneBankCreateBTree {
@@ -8,23 +9,26 @@ public class GeneBankCreateBTree {
     private static final byte T = 1;
     private static final byte C = 2;
     private static final byte G = 3;
-
     private final int SEQUENCE_LENGTH;
-    private final int TREE_DEGREE;
-
+    private final String sourceFile;
     private final BTree bTree;
 
-    public GeneBankCreateBTree(int sequenceLength, int treeDegree) {
+    public GeneBankCreateBTree(String sourceFile, int sequenceLength, int treeDegree) throws IOException {
+        this.sourceFile = sourceFile;
         SEQUENCE_LENGTH = sequenceLength;
-        TREE_DEGREE = treeDegree;
-        bTree = new BTree(TREE_DEGREE / 2);
+        bTree = new BTree(treeDegree, sourceFile + ".btree.data." + SEQUENCE_LENGTH + "." + treeDegree);
     }
 
     public static void main(String[] args) {
         int sequenceLength = 5; // replace with args[3]
         int treeDegree = 8; // replace with args[1]
-        GeneBankCreateBTree treeCreator = new GeneBankCreateBTree(sequenceLength, treeDegree);
-        treeCreator.readFile(new File("BTree/data/test1.gbk"));
+        GeneBankCreateBTree treeCreator;
+        try {
+            treeCreator = new GeneBankCreateBTree("BTree/data/test1.gbk", sequenceLength, treeDegree);
+            treeCreator.readFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         // just a line for me to put a breakpoint on for debugging
         System.out.println();
     }
@@ -72,9 +76,9 @@ public class GeneBankCreateBTree {
         return String.valueOf(chars);
     }
 
-    public void readFile(File file) {
+    public void readFile() throws IOException {
         // moved try block here to prevent resource leak on scanner
-        try (Scanner scanner = new Scanner(file)) {
+        try (Scanner scanner = new Scanner(new File(sourceFile))) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
 
