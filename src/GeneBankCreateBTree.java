@@ -77,7 +77,6 @@ public class GeneBankCreateBTree {
     }
 
     public void readFile() throws IOException {
-        // moved try block here to prevent resource leak on scanner
         try (Scanner scanner = new Scanner(new File(sourceFile))) {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
@@ -96,12 +95,49 @@ public class GeneBankCreateBTree {
                     String dnaSequence = sb.toString();
 
                     //insert the sequence into the BTree
-                    for (int i = 0; i <= dnaSequence.length() - SEQUENCE_LENGTH; i++) {
-                        String substring = dnaSequence.substring(i, i + SEQUENCE_LENGTH);
-                        if (!substring.contains("n")) {
-                            long binarySequence = dnaToLong(substring);
-                            bTree.insert(new TreeObject(binarySequence));
+                    int index = 0; //ending index of the window
+                    int count = 0;
+                    while (count != SEQUENCE_LENGTH && index < dnaSequence.length()) {
+                    //find a window to start with that doesn't contain an 'n'
+                        if (dnaSequence.charAt(index) == 'n') {
+                            count = 0;
+                        } else {
+                            count++;
                         }
+                        index++;
+                    }
+                    String substring = dnaSequence.substring(index - SEQUENCE_LENGTH, index);
+                    long binarySequence = dnaToLong(substring);
+                    bTree.insert(new TreeObject(binarySequence)); //insert the starting window
+                    while (index < dnaSequence.length()) {
+                        if (dnaSequence.charAt(index) == 'n') { //an 'n' is found
+                            while (dnaSequence.charAt(index) == 'n' && index < dnaSequence.length()) {
+                            //find next index that is not an 'n'
+                                index++;
+                            }
+                            if (index == dnaSequence.length()) { //dnaSequence ends in an 'n'
+                                break;
+                            }
+                            count = 0;
+                            while (count != SEQUENCE_LENGTH && index < dnaSequence.length()) {
+                            //again find a valid window to continue with
+                                if (dnaSequence.charAt(index) == 'n') {
+                                    count = 0;
+                                } else {
+                                    count++;
+                                }
+                                index++;
+                            }
+                            if (index == dnaSequence.length()) { //no valid windows after the last 'n'
+                                break;
+                            }
+                        } else { //not an 'n'; continue as normal
+                            index++;
+                        }
+                        //index will always make a valid window at this point
+                        substring = dnaSequence.substring(index - SEQUENCE_LENGTH, index);
+                        binarySequence = dnaToLong(substring);
+                        bTree.insert(new TreeObject(binarySequence));
                     }
                 }
             }
