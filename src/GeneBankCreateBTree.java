@@ -21,7 +21,7 @@ public class GeneBankCreateBTree {
         int treeDegree = 26; // replace with args[1], with current structure 26 should be a good size
         GeneBankCreateBTree treeCreator;
         try {
-            File sourceFile = new File("BTree/data/test3.gbk");
+            File sourceFile = new File("../BTree/data/test3.gbk");
             treeCreator = new GeneBankCreateBTree(sourceFile, sequenceLength, treeDegree);
             treeCreator.readFile();
             treeCreator.createDumpFile();
@@ -42,6 +42,11 @@ public class GeneBankCreateBTree {
                     line = scanner.nextLine();
                     while (!line.trim().equals("//")) {
                         String[] dnaLine = line.split(" ");
+                        while(dnaLine[0].isEmpty()){
+                            for(int i = 0; i < dnaLine.length - 1; i++){
+                                dnaLine[i] = dnaLine[i+1];
+                            }
+                        }
                         for (int i = 1; i < dnaLine.length; i++) { //start at 1 because the first index always contains a number
                             sb.append(dnaLine[i]);
                         }
