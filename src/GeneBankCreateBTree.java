@@ -39,18 +39,13 @@ public class GeneBankCreateBTree {
                 //find and parse the next DNA sequence in the file
                 if (line.trim().equals("ORIGIN")) {
                     StringBuilder sb = new StringBuilder();
-                    line = scanner.nextLine();
-                    while (!line.trim().equals("//")) {
+                    line = scanner.nextLine().trim();
+                    while (!line.equals("//")) {
                         String[] dnaLine = line.split(" ");
-                        while(dnaLine[0].isEmpty()){
-                            for(int i = 0; i < dnaLine.length - 1; i++){
-                                dnaLine[i] = dnaLine[i+1];
-                            }
-                        }
                         for (int i = 1; i < dnaLine.length; i++) { //start at 1 because the first index always contains a number
                             sb.append(dnaLine[i]);
                         }
-                        line = scanner.nextLine();
+                        line = scanner.nextLine().trim();
                     }
                     String dnaSequence = sb.toString();
 
@@ -104,6 +99,7 @@ public class GeneBankCreateBTree {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        //end
     }
 
     public void createDumpFile() {
