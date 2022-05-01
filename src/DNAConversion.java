@@ -6,8 +6,9 @@ public class DNAConversion {
 
     public static long dnaToLong(String sequence) {
         long l = 0;
-        for (char c : sequence.toCharArray()) {
-            switch (Character.toLowerCase(c)) {
+        char[] chars = sequence.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            switch (Character.toLowerCase(chars[i])) {
                 case 'a':
                     l += A;
                     break;
@@ -20,9 +21,8 @@ public class DNAConversion {
                 case 'g':
                     l += G;
             }
-            l <<= 2;
+            if (i < chars.length - 1) l <<= 2;
         }
-        l >>= 2;
         return l;
     }
 

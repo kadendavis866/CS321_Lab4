@@ -17,12 +17,12 @@ public class GeneBankCreateBTree {
     }
 
     public static void main(String[] args) {
-        int sequenceLength = 6; // replace with args[3]
+        int sequenceLength = 31; // replace with args[3]
 
         int treeDegree = (4096 - BTreeNode.METADATA_SIZE + TreeObject.DISK_SIZE) / (2 * (TreeObject.DISK_SIZE + Long.BYTES));
         GeneBankCreateBTree treeCreator;
         try {
-            File sourceFile = new File("BTree/data/test3.gbk");
+            File sourceFile = new File("BTree/data/test1.gbk");
             treeCreator = new GeneBankCreateBTree(sourceFile, sequenceLength, treeDegree);
             treeCreator.readFile();
             treeCreator.createDumpFile();
