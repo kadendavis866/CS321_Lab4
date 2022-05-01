@@ -3,19 +3,25 @@ import java.io.IOException;
 
 public class BTree {
 
+    public static final int MODE_WRITE = 0;
+    public static final int MODE_READ = 1;
     public static int METADATA_SIZE = Integer.BYTES + Long.BYTES;
-    public static int NODE_SIZE;
-    private final int t; // min children
-    private final int m; // degree/max children
+    private final int t; // degree/min children
+    private final int m; // order/max children
     private final DiskReadWrite diskrw;
     private BTreeNode root;
 
-    public BTree(int degree, String fileName) throws IOException {
-        m = degree;
-        t = degree / 2;
-        NODE_SIZE = BTreeNode.getDiskSize(m);
-        diskrw = new DiskReadWrite(new File(fileName), METADATA_SIZE, NODE_SIZE);
-        diskrw.writeMetadata(0, m);
+    public BTree(int degree, String fileName, int mode) throws IOException {
+        diskrw = new DiskReadWrite(new File(fileName), METADATA_SIZE);
+        if (mode == MODE_WRITE) {
+            t = degree;
+            m = degree * 2;
+            diskrw.writeMetadata(0, m);
+        } else {
+            t = diskrw.getDegree();
+            m = t * 2;
+            root = diskrw.readNode(diskrw.getRootAddress());
+        }
     }
 
     public void insert(TreeObject k) throws IOException {
@@ -52,7 +58,7 @@ public class BTree {
      * @param nonFull   node containing child to be split
      * @param fullChild index of node to be split
      */
-    public void splitChild(BTreeNode nonFull, int fullChild) throws IOException {
+    private void splitChild(BTreeNode nonFull, int fullChild) throws IOException {
         BTreeNode fullNode = diskrw.readNode(nonFull.children[fullChild]);
 
         // Create a new node
@@ -91,7 +97,7 @@ public class BTree {
         diskrw.updateNode(nonFull);
     }
 
-    public void insertNonFull(BTreeNode nonFull, TreeObject key) throws IOException {
+    private void insertNonFull(BTreeNode nonFull, TreeObject key) throws IOException {
 
         // i = index to insert key, starts at end of node
         int i = nonFull.n - 1;
@@ -133,7 +139,17 @@ public class BTree {
 
     }
 
-    public BTreeNode getContainingNode(long key) throws IOException {
+    public TreeObject get(long key) throws IOException {
+        return getTreeObject(getContainingNode(key), key);
+    }
+
+
+    /**
+     * @param key the key to search for
+     * @return the BTreeNode containing the key, null if not found
+     * @throws IOException
+     */
+    private BTreeNode getContainingNode(long key) throws IOException {
         BTreeNode node = root;
         while (node != null) {
             int i = 0;
@@ -149,7 +165,12 @@ public class BTree {
         return null;
     }
 
-    public TreeObject getTreeObject(BTreeNode node, long key) {
+    /**
+     * @param node node to search in
+     * @param key  value to search for
+     * @return the TreeObject in the node which contains the key
+     */
+    private TreeObject getTreeObject(BTreeNode node, long key) {
         if (node == null) return null;
         for (int i = 0; i < node.n; i++) {
             if (node.keys[i].substring == key) return node.keys[i];

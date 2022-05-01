@@ -5,18 +5,16 @@ import java.nio.channels.FileChannel;
 public class DiskReadWrite {
 
     private final int METADATA_SIZE;
-    private final int NODE_SIZE;
     private final FileChannel file;
-    private final ByteBuffer buffer;
+    private int NODE_SIZE;
+    private ByteBuffer buffer;
     private long endAddress;
     private int degree;
     private int sequenceLength;
 
 
-    public DiskReadWrite(File file, int metadataSize, int nodeSize) throws IOException {
+    public DiskReadWrite(File file, int metadataSize) throws IOException {
         METADATA_SIZE = metadataSize;
-        NODE_SIZE = nodeSize;
-        buffer = ByteBuffer.allocateDirect(nodeSize);
         endAddress = 0;
         degree = 0;
         file.createNewFile();
@@ -25,6 +23,8 @@ public class DiskReadWrite {
     }
 
     public void writeMetadata(long rootAddress, int degree) throws IOException {
+        NODE_SIZE = BTreeNode.getDiskSize(degree);
+        buffer = ByteBuffer.allocateDirect(NODE_SIZE);
         file.position(endAddress);
 
         ByteBuffer tmpBuffer = ByteBuffer.allocateDirect(METADATA_SIZE);
@@ -37,6 +37,27 @@ public class DiskReadWrite {
         file.write(tmpBuffer);
         endAddress += METADATA_SIZE;
         this.degree = degree;
+    }
+
+    public long getRootAddress() throws IOException {
+        file.position(0);
+        ByteBuffer tmpBuffer = ByteBuffer.allocateDirect(Long.BYTES);
+        tmpBuffer.clear();
+        file.read(tmpBuffer);
+        tmpBuffer.flip();
+        return tmpBuffer.getLong();
+    }
+
+    public int getDegree() throws IOException {
+        file.position(Long.BYTES);
+        ByteBuffer tmpBuffer = ByteBuffer.allocateDirect(Integer.BYTES);
+        tmpBuffer.clear();
+        file.read(tmpBuffer);
+        tmpBuffer.flip();
+        degree = tmpBuffer.getInt();
+        NODE_SIZE = BTreeNode.getDiskSize(degree);
+        buffer = ByteBuffer.allocateDirect(NODE_SIZE);
+        return degree;
     }
 
     private void writeNode(BTreeNode node, long address) throws IOException {
@@ -121,15 +142,6 @@ public class DiskReadWrite {
 
         tmpBuffer.flip();
         file.write(tmpBuffer);
-    }
-
-    public long getRootAddress() throws IOException {
-        file.position(0);
-        ByteBuffer tmpBuffer = ByteBuffer.allocateDirect(Long.BYTES);
-        tmpBuffer.clear();
-        file.read(tmpBuffer);
-        tmpBuffer.flip();
-        return tmpBuffer.getLong();
     }
 
     private void inOrderDump(BufferedWriter bw, BTreeNode node) throws IOException {

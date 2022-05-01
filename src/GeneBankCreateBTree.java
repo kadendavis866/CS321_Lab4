@@ -10,21 +10,23 @@ public class GeneBankCreateBTree {
     private final File sourceFile;
     private final BTree bTree;
 
-    public GeneBankCreateBTree(File sourceFile, int sequenceLength, int treeDegree) throws IOException {
+    public GeneBankCreateBTree(File sourceFile, int sequenceLength, int degree) throws IOException {
         this.sourceFile = sourceFile;
         SEQUENCE_LENGTH = sequenceLength;
-        bTree = new BTree(treeDegree, sourceFile.getName() + ".btree.data." + SEQUENCE_LENGTH + "." + treeDegree);
+        bTree = new BTree(degree, sourceFile.getName() + ".btree.data." + SEQUENCE_LENGTH + "." + degree, BTree.MODE_WRITE);
     }
 
     public static void main(String[] args) {
         int sequenceLength = 6; // replace with args[3]
-        int treeDegree = 26; // replace with args[1], with current structure 26 should be a good size
+
+        int treeDegree = (4096 - BTreeNode.METADATA_SIZE + TreeObject.DISK_SIZE) / (2 * (TreeObject.DISK_SIZE + Long.BYTES));
         GeneBankCreateBTree treeCreator;
         try {
-            File sourceFile = new File("../BTree/data/test3.gbk");
+            File sourceFile = new File("BTree/data/test3.gbk");
             treeCreator = new GeneBankCreateBTree(sourceFile, sequenceLength, treeDegree);
             treeCreator.readFile();
             treeCreator.createDumpFile();
+            System.out.println("Degree = " + treeDegree + "\nNode size: " + BTreeNode.getDiskSize(treeDegree));
         } catch (IOException e) {
             e.printStackTrace();
         }
