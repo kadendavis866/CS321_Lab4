@@ -147,7 +147,7 @@ public class BTree {
     /**
      * @param key the key to search for
      * @return the BTreeNode containing the key, null if not found
-     * @throws IOException
+     * @throws IOException if an error occurs when reading/writing to the file
      */
     private BTreeNode getContainingNode(long key) throws IOException {
         BTreeNode node = root;
@@ -182,3 +182,4 @@ public class BTree {
         diskrw.dump(filename, sequenceLength);
     }
 }
+ 

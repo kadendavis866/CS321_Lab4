@@ -25,63 +25,99 @@ public class GeneBankCreateBTree {
         int cacheSize = 0;
         int debugLevel = 0;
         //read in args
-        if(argsLength == 4 || argsLength == 5 || argsLength == 6){
-            try{
+        if (argsLength == 4 || argsLength == 5 || argsLength == 6) {
+            try {
                 cache = Integer.parseInt(args[0]);
-                if(cache > 1 || cache < 0){ //ensure cache 0 or 1
-                    System.out.println("Error: Invalid input for cache selection");
-                    throw new IllegalArgumentException();
+                if (cache > 1 || cache < 0) { //ensure cache 0 or 1
+                    throw new IllegalArgumentException("Error: Invalid input for cache selection");
                 }
-                treeDegree = Integer.parseInt(args[1]);
-                if(treeDegree == 0){ //sets optimal treeDegree if degree is 0
+                try {
+                    treeDegree = Integer.parseInt(args[1]);
+                    if (treeDegree != 0 && treeDegree < 2) {
+                        throw new IllegalArgumentException("Error: Invalid input for tree degree");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Error: Invalid input for tree degree");
+                }
+                if (treeDegree == 0) { //sets optimal treeDegree if degree is 0
                     treeDegree = (4096 - BTreeNode.METADATA_SIZE + TreeObject.DISK_SIZE) / (2 * (TreeObject.DISK_SIZE + Long.BYTES));
                 }
                 gbkFile = args[2];
-                sequenceLength = Integer.parseInt(args[3]);
+
+                try {
+                    sequenceLength = Integer.parseInt(args[3]);
+                    if (sequenceLength < 1) {
+                        throw new IllegalArgumentException("Error: Invalid input for sequence length");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Error: Invalid input for sequence length");
+                }
+
                 //check for optional arguments
-                if(argsLength == 5){
-                    if(cache == 1){
-                        cache = Integer.parseInt(args[4]);
+                if (argsLength == 5) {
+                    int arg4;
+                    try {
+                        arg4 = Integer.parseInt(args[4]);
+                    } catch (NumberFormatException e) {
+                        if (cache == 1) throw new IllegalArgumentException("Error: Invalid input for cache size");
+                        else throw new IllegalArgumentException("Error: Invalid input for debug level");
                     }
-                    else{
-                        debugLevel = Integer.parseInt(args[4]);
+                    if (cache == 1) {
+                        cacheSize = arg4;
+                    } else {
+                        debugLevel = arg4;
                     }
                 }
-                if(argsLength == 6){
-                    cache = Integer.parseInt(args[4]);
-                    debugLevel = Integer.parseInt(args[5]);
+                if (argsLength == 6) {
+                    int arg4;
+                    try {
+                        arg4 = Integer.parseInt(args[4]);
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException("Error: Invalid input for cache size");
+                    }
+                    int arg5;
+                    try {
+                        arg5 = Integer.parseInt(args[5]);
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException("Error: Invalid input for debug level");
+                    }
+                    cacheSize = arg4;
+                    debugLevel = arg5;
                 }
-                if(debugLevel > 1 || debugLevel < 0){
-                    System.out.println("Error: invalid input for debug level");
-                    throw new IllegalArgumentException();
-                }               
+                if (debugLevel > 1 || debugLevel < 0) {
+                    throw new IllegalArgumentException("Error: Invalid input for debug level");
+                }
+            } catch (IllegalArgumentException e) {
+                System.err.println(e.getMessage());
+                printUsageAndExit();
             }
-            catch(NumberFormatException e){
-                e.printStackTrace();
-                System.exit(1);
-            }
-            catch(IllegalArgumentException e){
-                e.printStackTrace();
-                System.exit(1);
-            }
-        }
-        else{
-            System.out.println("Usage: java GeneBankCreateBTree <0/1(no/with Cache)> <degree> <gbk file> <sequence length> [<cache size>] [<debug level>]");
-            System.exit(1);
+        } else {
+            System.err.println("Error: Invalid number of arguments");
+            printUsageAndExit();
         }
 
         GeneBankCreateBTree treeCreator;
         try {
-            File sourceFile = new File("../BTree/data/" + gbkFile);
+            @SuppressWarnings("ConstantConditions")
+            File sourceFile = new File(gbkFile);
+            if (!(sourceFile.exists() && sourceFile.isFile())) {
+                System.err.println("Unable to locate file at: " + sourceFile.getAbsolutePath());
+                printUsageAndExit();
+            }
             treeCreator = new GeneBankCreateBTree(sourceFile, sequenceLength, treeDegree);
             treeCreator.readFile();
-            if(debugLevel == 1){
+            if (debugLevel == 1) {
                 treeCreator.createDumpFile();
             }
             System.out.println("Degree = " + treeDegree + "\nNode size: " + BTreeNode.getDiskSize(treeDegree));
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void printUsageAndExit() {
+        System.out.println("Usage: java GeneBankCreateBTree <0/1(no/with Cache)> <degree> <gbk file> <sequence length> [<cache size>] [<debug level>]");
+        System.exit(1);
     }
 
     public void readFile() throws IOException {
@@ -119,12 +155,9 @@ public class GeneBankCreateBTree {
                     bTree.insert(new TreeObject(binarySequence)); //insert the starting window
                     while (index < dnaSequence.length()) {
                         if (dnaSequence.charAt(index) == 'n') { //an 'n' is found
-                            while (dnaSequence.charAt(index) == 'n' && index < dnaSequence.length()) {
+                            while (dnaSequence.charAt(index) == 'n') {
                                 //find next index that is not an 'n'
                                 index++;
-                            }
-                            if (index == dnaSequence.length()) { //dnaSequence ends in an 'n'
-                                break;
                             }
                             count = 0;
                             while (count != SEQUENCE_LENGTH && index < dnaSequence.length()) {
