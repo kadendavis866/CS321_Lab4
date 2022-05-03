@@ -10,8 +10,11 @@ public class BTree {
     private final int m; // order/max children
     private final DiskReadWrite diskrw;
     private BTreeNode root;
+    private Cache<Long, BTreeNode> cache;
+    private boolean useCache;
 
     public BTree(int degree, String fileName, int mode) throws IOException {
+        useCache = false;
         diskrw = new DiskReadWrite(new File(fileName), METADATA_SIZE);
         if (mode == MODE_WRITE) {
             t = degree;
@@ -22,6 +25,12 @@ public class BTree {
             m = t * 2;
             root = diskrw.readNode(diskrw.getRootAddress());
         }
+    }
+
+    public BTree(int degree, String fileName, int cacheSize, int mode) throws IOException {
+        this(degree, fileName, mode);
+        useCache = true;
+        cache = new Cache<>(cacheSize);
     }
 
     public void insert(TreeObject k) throws IOException {
@@ -59,7 +68,7 @@ public class BTree {
      * @param fullChild index of node to be split
      */
     private void splitChild(BTreeNode nonFull, int fullChild) throws IOException {
-        BTreeNode fullNode = diskrw.readNode(nonFull.children[fullChild]);
+        BTreeNode fullNode = getNode(nonFull.children[fullChild]);
 
         // Create a new node
         BTreeNode newNode = new BTreeNode(t, fullNode.leaf);
@@ -120,7 +129,7 @@ public class BTree {
         } else {
             // Find the correct child
             while (i >= 0 && nonFull.keys[i].compareTo(key) > 0) i--;
-            BTreeNode child = diskrw.readNode(nonFull.children[i + 1]);
+            BTreeNode child = getNode(nonFull.children[i + 1]);
 
             // if child is full, split it
             if (child.n == m - 1) {
@@ -128,9 +137,9 @@ public class BTree {
 
                 // go to next child if necessary
                 if (nonFull.keys[i + 1].compareTo(key) < 0) {
-                    child = diskrw.readNode(nonFull.children[i + 2]);
+                    child = getNode(nonFull.children[i + 2]);
                 } else {
-                    child = diskrw.readNode(nonFull.children[i + 1]);
+                    child = getNode(nonFull.children[i + 1]);
                 }
             }
             // calls the method recursively until a leaf node is found
@@ -160,7 +169,7 @@ public class BTree {
                     break;
                 }
             }
-            node = diskrw.readNode(node.children[i]);
+            node = getNode(node.children[i]);
         }
         return null;
     }
@@ -180,6 +189,20 @@ public class BTree {
 
     public void dump(String filename, int sequenceLength) {
         diskrw.dump(filename, sequenceLength);
+    }
+
+    private BTreeNode getNode(long address) throws IOException {
+        if (useCache) {
+            BTreeNode node = cache.getObject(address);
+            if (node == null) {
+                node = diskrw.readNode(address);
+                cache.add(address, node);
+                return node;
+            }
+            return node;
+        } else {
+            return diskrw.readNode(address);
+        }
     }
 }
  

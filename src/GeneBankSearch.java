@@ -8,7 +8,7 @@ import java.util.Scanner;
 public class GeneBankSearch {
     public static void main(String[] args) {
         long startTime = System.nanoTime();
-        boolean useCache;
+        boolean useCache = false;
         String bTreeFilename = null;
         String queryFilename = null;
         int cacheSize = 0;
@@ -62,7 +62,12 @@ public class GeneBankSearch {
             }
 
             // perform search on queries
-            BTree bTree = new BTree(0, bTreeFilename, BTree.MODE_READ);
+            BTree bTree;
+            if (useCache) {
+                bTree = new BTree(0, bTreeFilename, cacheSize, BTree.MODE_READ);
+            } else {
+                bTree = new BTree(0, bTreeFilename, BTree.MODE_READ);
+            }
             bw = new BufferedWriter(new FileWriter(outputFilename));
             int frequency = search(bTree, line);
             if (frequency != 0) {

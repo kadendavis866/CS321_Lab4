@@ -16,10 +16,16 @@ public class GeneBankCreateBTree {
         bTree = new BTree(degree, sourceFile.getName() + ".btree.data." + SEQUENCE_LENGTH + "." + degree, BTree.MODE_WRITE);
     }
 
+    public GeneBankCreateBTree(File sourceFile, int sequenceLength, int degree, int cacheSize) throws IOException {
+        this.sourceFile = sourceFile;
+        SEQUENCE_LENGTH = sequenceLength;
+        bTree = new BTree(degree, sourceFile.getName() + ".btree.data." + SEQUENCE_LENGTH + "." + degree, cacheSize, BTree.MODE_WRITE);
+    }
+
     public static void main(String[] args) {
         long startTime = System.nanoTime();
         int argsLength = args.length;
-        int cache;
+        boolean useCache = false;
         String gbkFile = null;
         int sequenceLength = 0;
         int treeDegree = 0;
@@ -31,7 +37,7 @@ public class GeneBankCreateBTree {
                 if (!args[0].equals("0") && !args[0].equals("1")) { //ensure cache 0 or 1
                     throw new IllegalArgumentException("Error: Invalid input for cache selection");
                 }
-                cache = Integer.parseInt(args[0]);
+                useCache = args[0].equals("1");
                 try {
                     treeDegree = Integer.parseInt(args[1]);
                     if (treeDegree != 0 && treeDegree < 2) {
@@ -60,10 +66,10 @@ public class GeneBankCreateBTree {
                     try {
                         arg4 = Integer.parseInt(args[4]);
                     } catch (NumberFormatException e) {
-                        if (cache == 1) throw new IllegalArgumentException("Error: Invalid input for cache size");
+                        if (useCache) throw new IllegalArgumentException("Error: Invalid input for cache size");
                         else throw new IllegalArgumentException("Error: Invalid input for debug level");
                     }
-                    if (cache == 1) {
+                    if (useCache) {
                         cacheSize = arg4;
                     } else {
                         debugLevel = arg4;
@@ -105,7 +111,11 @@ public class GeneBankCreateBTree {
                 System.err.println("Unable to locate file at: " + sourceFile.getAbsolutePath());
                 printUsageAndExit();
             }
-            treeCreator = new GeneBankCreateBTree(sourceFile, sequenceLength, treeDegree);
+            if (useCache) {
+                treeCreator = new GeneBankCreateBTree(sourceFile, sequenceLength, treeDegree, cacheSize);
+            } else {
+                treeCreator = new GeneBankCreateBTree(sourceFile, sequenceLength, treeDegree);
+            }
             treeCreator.readFile();
             if (debugLevel == 1) {
                 treeCreator.createDumpFile();
