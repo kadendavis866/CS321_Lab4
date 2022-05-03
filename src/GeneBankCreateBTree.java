@@ -17,6 +17,7 @@ public class GeneBankCreateBTree {
     }
 
     public static void main(String[] args) {
+        long startTime = System.nanoTime();
         int argsLength = args.length;
         int cache;
         String gbkFile = null;
@@ -27,10 +28,10 @@ public class GeneBankCreateBTree {
         //read in args
         if (argsLength == 4 || argsLength == 5 || argsLength == 6) {
             try {
-                cache = Integer.parseInt(args[0]);
-                if (cache > 1 || cache < 0) { //ensure cache 0 or 1
+                if (!args[0].equals("0") && !args[0].equals("1")) { //ensure cache 0 or 1
                     throw new IllegalArgumentException("Error: Invalid input for cache selection");
                 }
+                cache = Integer.parseInt(args[0]);
                 try {
                     treeDegree = Integer.parseInt(args[1]);
                     if (treeDegree != 0 && treeDegree < 2) {
@@ -113,6 +114,8 @@ public class GeneBankCreateBTree {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        long time = (System.nanoTime() - startTime);
+        System.out.println(time / Math.pow(10, 9));
     }
 
     public static void printUsageAndExit() {

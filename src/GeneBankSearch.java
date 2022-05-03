@@ -1,14 +1,146 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 
+@SuppressWarnings("ConstantConditions")
 public class GeneBankSearch {
     public static void main(String[] args) {
+        boolean useCache;
+        String bTreeFilename = null;
+        String queryFilename = null;
+        int cacheSize = 0;
+        int debugLevel = 0;
+        if (verifyArgs(args)) {
+            useCache = args[0].equals("1");
+            bTreeFilename = args[1];
+            queryFilename = args[2];
+            if (args.length == 4) {
+                if (useCache) cacheSize = Integer.parseInt(args[3]);
+                else debugLevel = Integer.parseInt(args[3]);
+            }
+            if (args.length == 5) {
+                cacheSize = Integer.parseInt(args[3]);
+                debugLevel = Integer.parseInt(args[4]);
+            }
+        } else {
+            printUsageAndExit();
+        }
+
+
+        // verify file compatibility
+        String[] bTreeFilenameArr = bTreeFilename.split("\\.");
+        File bTreeFile = new File(bTreeFilename);
+        if (!bTreeFile.exists()) {
+            System.err.println("Error: Unable to locate file at: " + bTreeFile.getAbsolutePath());
+            printUsageAndExit();
+        }
+        File queryFile = new File(queryFilename);
+        if (!queryFile.exists()) {
+            System.err.println("Error: Unable to locate file at: " + queryFile.getAbsolutePath());
+            printUsageAndExit();
+        }
+        String outputFilename = null;
+
+        Scanner scan = null;
+        BufferedWriter bw = null;
         try {
-            BTree bTree = new BTree(0, "test3.gbk.btree.data.6.102", BTree.MODE_READ);
-            String searchString = "aaaaat";
-            TreeObject o = bTree.get(DNAConversion.dnaToLong(searchString));
-            System.out.println("frequency of searchString: " + (o == null ? 0 : bTree.get(DNAConversion.dnaToLong(searchString)).frequency));
+            scan = new Scanner(queryFile);
+            String line = scan.nextLine().trim().toLowerCase();
+            // verify that sequence lengths match
+            try {
+                if (line.length() != Integer.parseInt(bTreeFilenameArr[bTreeFilenameArr.length - 2])) {
+                    System.err.println("Error: sequence length mismatch");
+                    printUsageAndExit();
+                }
+                outputFilename = bTreeFilenameArr[bTreeFilenameArr.length - 6] + "_" + queryFile.getName() + "_result";
+            } catch (Exception e) {
+                System.err.println("Error: Invalid BTree file");
+                printUsageAndExit();
+            }
+
+            // perform search on queries
+            BTree bTree = new BTree(0, bTreeFilename, BTree.MODE_READ);
+            bw = new BufferedWriter(new FileWriter(outputFilename));
+            int frequency = search(bTree, line);
+            if (frequency != 0) {
+                bw.write(String.format("%s: %d\n", line, frequency));
+            }
+            while (scan.hasNextLine()) {
+                line = scan.nextLine().trim().toLowerCase();
+                frequency = search(bTree, line);
+                if (frequency != 0) {
+                    bw.write(String.format("%s: %d\n", line, frequency));
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            // close streams
+            try {
+                if (scan != null) scan.close();
+                if (bw != null) bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    public static boolean verifyArgs(String[] args) {
+        try {
+            if (args.length > 2 && args.length < 6) {
+                if (!args[0].equals("0") && !args[0].equals("1")) {
+                    throw new IllegalArgumentException("Error: Invalid input for cache selection");
+                }
+                boolean useCache = args[0].equals("1");
+                if (args.length == 4) {
+                    try {
+                        int arg3 = Integer.parseInt(args[3]);
+                        if (useCache) {
+                            if (arg3 < 1) {
+                                throw new IllegalArgumentException("Error: Invalid input for cache size");
+                            }
+                        } else {
+                            if (arg3 < 0 || arg3 > 1) {
+                                throw new IllegalArgumentException("Error: Invalid input for debug level");
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        if (useCache) throw new IllegalArgumentException("Error: Invalid input for cache size");
+                        else throw new IllegalArgumentException("Error: Invalid input for debug level");
+                    }
+                } else if (args.length == 5) {
+                    try {
+                        if (Integer.parseInt(args[3]) < 1) {
+                            throw new IllegalArgumentException("Error: Invalid input for cache size");
+                        }
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException("Error: Invalid input for cache size");
+                    }
+                    try {
+                        if (Integer.parseInt(args[4]) < 0 || Integer.parseInt(args[4]) > 1) {
+                            throw new IllegalArgumentException("Error: Invalid input for debug level");
+                        }
+                    } catch (NumberFormatException e) {
+                        throw new IllegalArgumentException("Error: Invalid input for debug level");
+                    }
+                }
+            } else throw new IllegalArgumentException("Error: Invalid number of arguments");
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    public static void printUsageAndExit() {
+        System.out.println("java GeneBankSearch <0/1(no/with Cache)> <btree file> <query file> [<cache size>] [<debug level>]");
+        System.exit(1);
+    }
+
+    public static int search(BTree bTree, String query) throws IOException {
+        TreeObject o = bTree.get(DNAConversion.dnaToLong(query));
+        return (o == null ? 0 : o.frequency);
     }
 }

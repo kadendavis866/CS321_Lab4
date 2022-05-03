@@ -1,3 +1,4 @@
+@SuppressWarnings("CanBeFinal")
 public class BTreeNode {
 
     public static final int METADATA_SIZE = Integer.BYTES + 1;

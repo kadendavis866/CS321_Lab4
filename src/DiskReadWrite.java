@@ -2,6 +2,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class DiskReadWrite {
 
     private final int METADATA_SIZE;

@@ -5,7 +5,7 @@ public class BTree {
 
     public static final int MODE_WRITE = 0;
     public static final int MODE_READ = 1;
-    public static int METADATA_SIZE = Integer.BYTES + Long.BYTES;
+    public static final int METADATA_SIZE = Integer.BYTES + Long.BYTES;
     private final int t; // degree/min children
     private final int m; // order/max children
     private final DiskReadWrite diskrw;
