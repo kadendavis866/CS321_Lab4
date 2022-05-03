@@ -7,6 +7,7 @@ import java.util.Scanner;
 @SuppressWarnings("ConstantConditions")
 public class GeneBankSearch {
     public static void main(String[] args) {
+        long startTime = System.nanoTime();
         boolean useCache;
         String bTreeFilename = null;
         String queryFilename = null;
@@ -85,6 +86,10 @@ public class GeneBankSearch {
                 e.printStackTrace();
             }
         }
+        double timeSeconds = (System.nanoTime() - startTime) / Math.pow(10, 9);
+        int timeMinutes = (int) timeSeconds / 60;
+        timeSeconds %= 60;
+        System.out.printf("Time elapsed(m:s) %d:%f", timeMinutes, timeSeconds);
     }
 
     public static boolean verifyArgs(String[] args) {

@@ -47,7 +47,7 @@ public class GeneBankCreateBTree {
 
                 try {
                     sequenceLength = Integer.parseInt(args[3]);
-                    if (sequenceLength < 1) {
+                    if (sequenceLength < 1 || sequenceLength > 31) {
                         throw new IllegalArgumentException("Error: Invalid input for sequence length");
                     }
                 } catch (NumberFormatException e) {
@@ -114,8 +114,10 @@ public class GeneBankCreateBTree {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        long time = (System.nanoTime() - startTime);
-        System.out.println(time / Math.pow(10, 9));
+        double timeSeconds = (System.nanoTime() - startTime) / Math.pow(10, 9);
+        int timeMinutes = (int) timeSeconds / 60;
+        timeSeconds %= 60;
+        System.out.printf("Time elapsed(m:s) %d:%f", timeMinutes, timeSeconds);
     }
 
     public static void printUsageAndExit() {
