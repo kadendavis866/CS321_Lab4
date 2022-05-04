@@ -1,6 +1,10 @@
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Represents a BTree, uses a file on the disk for storage
+ * Maintains BTree property
+ */
 public class BTree {
 
     public static final int MODE_WRITE = 0;
@@ -13,6 +17,14 @@ public class BTree {
     private Cache<Long, BTreeNode> cache;
     private boolean useCache;
 
+    /**
+     * Creates a new BTree (without cache), can either create an empty tree or load a tree from a file.
+     * Initializes a DiskReadWrite object for disk access.
+     *
+     * @param degree   degree of BTree, i.e. minimum number of child nodes
+     * @param fileName name of file where BTree will be stored
+     * @param mode     0 for creating a new tree, 1 for loading from an existing file
+     */
     public BTree(int degree, String fileName, int mode) throws IOException {
         useCache = false;
         diskrw = new DiskReadWrite(new File(fileName), METADATA_SIZE);
@@ -27,12 +39,27 @@ public class BTree {
         }
     }
 
+    /**
+     * Creates a new BTree (with cache), can either create an empty tree or load a tree from a file.
+     * Initializes a DiskReadWrite object for disk access.
+     *
+     * @param degree    degree of BTree, i.e. minimum number of child nodes
+     * @param fileName  name of file where BTree will be stored
+     * @param cacheSize number of objects that can be stored in cache
+     * @param mode      0 for creating a new tree, 1 for loading from an existing file
+     */
     public BTree(int degree, String fileName, int cacheSize, int mode) throws IOException {
         this(degree, fileName, mode);
         useCache = true;
         cache = new Cache<>(cacheSize);
     }
 
+    /**
+     * Inserts a TreeObject into the BTree while maintaining the BTree property.
+     * Updates file on disk
+     *
+     * @param k TreeObject to insert
+     */
     public void insert(TreeObject k) throws IOException {
         if (root == null) {
             root = new BTreeNode(t, true);
@@ -64,6 +91,8 @@ public class BTree {
     }
 
     /**
+     * Splits a child node and updates the file on the disk
+     *
      * @param nonFull   node containing child to be split
      * @param fullChild index of node to be split
      */
@@ -106,6 +135,13 @@ public class BTree {
         diskrw.updateNode(nonFull);
     }
 
+    /**
+     * Inserts a TreeObject into the proper leaf node of the BTree.
+     * Uses a recursive strategy to split nodes as necessary.
+     *
+     * @param nonFull non-full node
+     * @param key     TreeObject to be added
+     */
     private void insertNonFull(BTreeNode nonFull, TreeObject key) throws IOException {
 
         // i = index to insert key, starts at end of node
@@ -148,15 +184,20 @@ public class BTree {
 
     }
 
+    /**
+     * @param key long representation of DNA string to search for
+     * @return the TreeObject that contains the target long value, null if not in tree
+     */
     public TreeObject get(long key) throws IOException {
         return getTreeObject(getContainingNode(key), key);
     }
 
 
     /**
-     * @param key the key to search for
+     * Finds and returns the BTreeNode containing the target key value
+     *
+     * @param key the key (sequence) to search for
      * @return the BTreeNode containing the key, null if not found
-     * @throws IOException if an error occurs when reading/writing to the file
      */
     private BTreeNode getContainingNode(long key) throws IOException {
         BTreeNode node = root;
@@ -175,6 +216,8 @@ public class BTree {
     }
 
     /**
+     * returns the TreeObject from the node if it exists
+     *
      * @param node node to search in
      * @param key  value to search for
      * @return the TreeObject in the node which contains the key
@@ -187,10 +230,21 @@ public class BTree {
         return null;
     }
 
+    /**
+     * @param filename       name/location of file to save the dump file at
+     * @param sequenceLength length of DNA sequence, important for converting from long to string
+     */
     public void dump(String filename, int sequenceLength) {
         diskrw.dump(filename, sequenceLength);
     }
 
+    /**
+     * Gets the node at the given address.
+     * If cache is enabled, the cache will be searched before the file on the disk.
+     *
+     * @param address address of node to retrieve
+     * @return the node at the given address
+     */
     private BTreeNode getNode(long address) throws IOException {
         if (useCache) {
             BTreeNode node = cache.getObject(address);
