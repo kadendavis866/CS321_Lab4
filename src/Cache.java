@@ -9,8 +9,8 @@
  * <p>
  * Note: The end of the list is the top of the cache.
  *
+ * @param <K> type of key used to reference the objects in the cache
  * @param <T> type of objects to be stored
- * @author Kaden Davis
  * @version Spring2022
  */
 @SuppressWarnings("unused")
@@ -35,10 +35,21 @@ public class Cache<K, T> {
         hits = 0;
     }
 
+    /**
+     * Adds an object to the top of the cache
+     *
+     * @param key  key of new object
+     * @param data object to be added
+     */
     public void add(K key, T data) {
         add(new CacheNode<>(key, data));
     }
 
+    /**
+     * Adds a new CacheNode to the top of the cache
+     *
+     * @param node CacheNode to be added
+     */
     private void add(CacheNode<K, T> node) {
         // check if cache is empty
         if (isEmpty()) {
@@ -58,15 +69,31 @@ public class Cache<K, T> {
         count++;
     }
 
+    /**
+     * Removes a CacheObject from the cache
+     *
+     * @param key key of object to remove
+     */
     public void remove(K key) {
         remove(find(key));
     }
 
+    /**
+     * Moves a CacheNode to the top of the cache
+     *
+     * @param node CacheNode to be moved
+     */
     private void move(CacheNode<K, T> node) {
         remove(node);
         add(node);
     }
 
+    /**
+     * Retrieves an object from the cache and moves it to the top
+     *
+     * @param key key of object to search for
+     * @return the object with the corresponding key, null if it does not exist
+     */
     public T getObject(K key) {
         accesses++;
         CacheNode<K, T> node = find(key);
@@ -76,14 +103,23 @@ public class Cache<K, T> {
         return node.getElement();
     }
 
+    /**
+     * @return number of cache hits
+     */
     public int getHits() {
         return hits;
     }
 
+    /**
+     * @return number of cache accesses
+     */
     public int getAccesses() {
         return accesses;
     }
 
+    /**
+     * @return the hit-rate (hits/accesses)
+     */
     public double getHitRate() {
         // don't divide by 0
         if (accesses != 0) {
@@ -93,18 +129,24 @@ public class Cache<K, T> {
         }
     }
 
+    /**
+     * deletes all cache contents and resets the cache variables
+     */
     public void clear() {
         head = tail = null;
         count = 0;
     }
 
+    /**
+     * @return true if cache is empty, false otherwise
+     */
     public boolean isEmpty() {
         return (count == 0);
     }
 
     /**
      * Searches the cache (from top to bottom) for the target object. If found, the
-     * corresponding DLLNode<> is returned.
+     * corresponding CacheNode is returned.
      *
      * @param key key of target object
      * @return the node containing the target object from the cache, null if the

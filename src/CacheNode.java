@@ -2,8 +2,8 @@
  * This class represents a node to be used in a double-linked-list
  * implementation of a cache
  *
+ * @param <K> type of key used to reference the cache abjects
  * @param <T> type of object to be stored
- * @author Kaden Davis
  * @version Spring2022
  */
 @SuppressWarnings({"FieldMayBeFinal", "CanBeFinal"})
@@ -17,6 +17,7 @@ public class CacheNode<K, T> {
     /**
      * Initializes a new CacheNode which stores the provided object
      *
+     * @param key     key of new CacheNode
      * @param element the object to be stored in this node
      */
     public CacheNode(K key, T element) {

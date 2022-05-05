@@ -2,6 +2,10 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+/**
+ * Contains methods for reading and writing BTree data to/from a file on the disk.
+ * This class is also responsible for creating a dump file if requested.
+ */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class DiskReadWrite {
 
@@ -14,6 +18,13 @@ public class DiskReadWrite {
     private int sequenceLength;
 
 
+    /**
+     * Initializes a new DiskReadWrite object
+     * Creates a new file if necessary
+     *
+     * @param file         file to read from, or create if it doesn't exist
+     * @param metadataSize size of metadata, used when loading from a file
+     */
     public DiskReadWrite(File file, int metadataSize) throws IOException {
         METADATA_SIZE = metadataSize;
         endAddress = 0;
@@ -23,6 +34,14 @@ public class DiskReadWrite {
         this.file = dataFile.getChannel();
     }
 
+    /**
+     * Writes the metadata to the disk.
+     * Bytes|     8     |    4     |
+     * |rootAddress|treeDegree|
+     *
+     * @param rootAddress address of root node
+     * @param degree      tree degree
+     */
     public void writeMetadata(long rootAddress, int degree) throws IOException {
         NODE_SIZE = BTreeNode.getDiskSize(degree);
         buffer = ByteBuffer.allocateDirect(NODE_SIZE);
@@ -40,6 +59,11 @@ public class DiskReadWrite {
         this.degree = degree;
     }
 
+    /**
+     * Reads the root address from the metadata on the disk
+     *
+     * @return address of the root object
+     */
     public long getRootAddress() throws IOException {
         file.position(0);
         ByteBuffer tmpBuffer = ByteBuffer.allocateDirect(Long.BYTES);
@@ -49,6 +73,11 @@ public class DiskReadWrite {
         return tmpBuffer.getLong();
     }
 
+    /**
+     * Reads the degree of the BTree from the metadata on the disk
+     *
+     * @return the degree of the BTree
+     */
     public int getDegree() throws IOException {
         file.position(Long.BYTES);
         ByteBuffer tmpBuffer = ByteBuffer.allocateDirect(Integer.BYTES);
@@ -61,12 +90,19 @@ public class DiskReadWrite {
         return degree;
     }
 
+    /**
+     * Writes a node to the disk at the given address
+     *
+     * @param node    the node to be written on the disk
+     * @param address address to write node to
+     */
     private void writeNode(BTreeNode node, long address) throws IOException {
         file.position(address);
 
         buffer.clear();
         buffer.putInt(node.n);
 
+        // node metadata
         byte leaf = 0;
         if (node.leaf) leaf = 1;
         buffer.put(leaf);
@@ -95,16 +131,30 @@ public class DiskReadWrite {
         file.write(buffer);
     }
 
+    /**
+     * Writes a node to the end of the file
+     *
+     * @param node node to be written to the disk
+     */
     public void writeNode(BTreeNode node) throws IOException {
         node.address = endAddress;
         writeNode(node, endAddress);
         endAddress += NODE_SIZE;
     }
 
+    /**
+     * Updates a node on the disk. (Writes the node to its previous location)
+     *
+     * @param node node to be updated on disk
+     */
     public void updateNode(BTreeNode node) throws IOException {
         writeNode(node, node.address);
     }
 
+    /**
+     * @param address address of node to be retrieved
+     * @return the node at the specified address
+     */
     public BTreeNode readNode(long address) throws IOException {
         if (address == 0) return null;
 
@@ -134,6 +184,11 @@ public class DiskReadWrite {
         return node;
     }
 
+    /**
+     * Updates the location of the root node in the file
+     *
+     * @param rootAddress address of new root
+     */
     public void setRoot(Long rootAddress) throws IOException {
         file.position(0);
         ByteBuffer tmpBuffer = ByteBuffer.allocateDirect(Long.BYTES);
@@ -145,6 +200,12 @@ public class DiskReadWrite {
         file.write(tmpBuffer);
     }
 
+    /**
+     * Recursively writes each BTreeNode to the dump file using in-order traversal
+     *
+     * @param bw   BufferedWriter used to write to the file
+     * @param node root node
+     */
     private void inOrderDump(BufferedWriter bw, BTreeNode node) throws IOException {
         if (node.leaf) {
             for (int i = 0; i < node.n; i++) {
@@ -159,6 +220,12 @@ public class DiskReadWrite {
         }
     }
 
+    /**
+     * Creates a dump file and writes node data using in-order traversal
+     *
+     * @param filename       name of dump file
+     * @param sequenceLength length of DNA sequence
+     */
     public void dump(String filename, int sequenceLength) {
         this.sequenceLength = sequenceLength;
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filename))) {
