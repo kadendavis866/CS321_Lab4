@@ -1,3 +1,6 @@
+/**
+ * Represents a tree object to be stored in a BTree
+ */
 public class TreeObject implements Comparable<TreeObject> {
 
     public static final int DISK_SIZE = Long.BYTES + Integer.BYTES;
@@ -5,11 +8,22 @@ public class TreeObject implements Comparable<TreeObject> {
     protected final long substring;
     protected int frequency;
 
+    /**
+     * creates a TreeObject with a frequency of 1
+     *
+     * @param substring DNA sequence (long)
+     */
     public TreeObject(long substring) {//Passed in substring
         frequency = 1;
         this.substring = substring;
     }
 
+    /**
+     * Creates a tree object
+     *
+     * @param substring DNA sequence (long)
+     * @param frequency frequency of sequence
+     */
     public TreeObject(long substring, int frequency) {
         this.substring = substring;
         this.frequency = frequency;
@@ -27,6 +41,9 @@ public class TreeObject implements Comparable<TreeObject> {
         return 0;
     }
 
+    /**
+     * increments the frequency of this object by 1
+     */
     public void incrementFrequency() {
         frequency++;
     }

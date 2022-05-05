@@ -4,8 +4,21 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
+/**
+ * Driver class
+ * Reads queries from a file and searches for each query in the BTree.
+ * If debug level is 0 results are printed on the standard output stream.
+ * If debug level is 1 results will also be stored to a result file.
+ */
 @SuppressWarnings("ConstantConditions")
 public class GeneBankSearch {
+
+    /**
+     * loads arguments and creates a BTree from the btree file.
+     * loads query file and searches the BTree.
+     *
+     * @param args command line arguments <0/1(no/with Cache)> <btree file> <query file> [<cache size>] [<debug level>]
+     */
     public static void main(String[] args) {
         long startTime = System.nanoTime();
         boolean useCache = false;
@@ -61,23 +74,29 @@ public class GeneBankSearch {
                 printUsageAndExit();
             }
 
-            // perform search on queries
+            //cache
             BTree bTree;
             if (useCache) {
                 bTree = new BTree(0, bTreeFilename, cacheSize, BTree.MODE_READ);
             } else {
                 bTree = new BTree(0, bTreeFilename, BTree.MODE_READ);
             }
-            bw = new BufferedWriter(new FileWriter(outputFilename));
+
+            // perform search on queries
+            if (debugLevel == 1) bw = new BufferedWriter(new FileWriter(outputFilename));
             int frequency = search(bTree, line);
             if (frequency != 0) {
-                bw.write(String.format("%s: %d\n", line, frequency));
+                String output = String.format("%s: %d\n", line, frequency);
+                if (debugLevel == 1)bw.write(output);
+                System.out.println(output);
             }
             while (scan.hasNextLine()) {
                 line = scan.nextLine().trim().toLowerCase();
                 frequency = search(bTree, line);
                 if (frequency != 0) {
-                    bw.write(String.format("%s: %d\n", line, frequency));
+                    String output = String.format("%s: %d\n", line, frequency);
+                    if (debugLevel == 1) bw.write(output);
+                    System.out.println(output);
                 }
             }
         } catch (IOException e) {
@@ -97,13 +116,24 @@ public class GeneBankSearch {
         System.out.printf("Time elapsed(m:s) %d:%f", timeMinutes, timeSeconds);
     }
 
+    /**
+     * Verify that all command line args are valid
+     *
+     * @param args command line args
+     * @return true if all args are valid false otherwise
+     */
     public static boolean verifyArgs(String[] args) {
         try {
+
+            // Verify args length
             if (args.length > 2 && args.length < 6) {
+                // verify that cache arg is 0 or 1
                 if (!args[0].equals("0") && !args[0].equals("1")) {
                     throw new IllegalArgumentException("Error: Invalid input for cache selection");
                 }
                 boolean useCache = args[0].equals("1");
+
+                // Verify that any optional args are integers and in the correct range
                 if (args.length == 4) {
                     try {
                         int arg3 = Integer.parseInt(args[3]);
@@ -144,11 +174,21 @@ public class GeneBankSearch {
         return true;
     }
 
+    /**
+     * Prints a usage statement and exits the program
+     */
     public static void printUsageAndExit() {
         System.out.println("java GeneBankSearch <0/1(no/with Cache)> <btree file> <query file> [<cache size>] [<debug level>]");
         System.exit(1);
     }
 
+    /**
+     * searches the BTree for the DNA sequence and returns the frequency of the sequence
+     *
+     * @param bTree BTree to search
+     * @param query sequence to search for
+     * @return the frequency of the sequence in the btree
+     */
     public static int search(BTree bTree, String query) throws IOException {
         TreeObject o = bTree.get(DNAConversion.dnaToLong(query));
         return (o == null ? 0 : o.frequency);
