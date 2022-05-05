@@ -6,7 +6,7 @@
  * @param <T> type of object to be stored
  * @version Spring2022
  */
-@SuppressWarnings({"FieldMayBeFinal", "CanBeFinal"})
+@SuppressWarnings({"CanBeFinal", "FieldMayBeFinal"})
 public class CacheNode<K, T> {
 
     private K key;

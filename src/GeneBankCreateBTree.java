@@ -151,12 +151,11 @@ public class GeneBankCreateBTree {
 
                 if (args.length == 5) {
                     try {
-                        if(useCache){
-                            if(Integer.parseInt(args[4]) < 1){
+                        if (useCache) {
+                            if (Integer.parseInt(args[4]) < 1) {
                                 throw new IllegalArgumentException("Error: Invalid input for cache size");
                             }
-                        }
-                        else{
+                        } else {
                             int debugLevel = Integer.parseInt(args[4]);
                             if (debugLevel > 1 || debugLevel < 0) {
                                 throw new IllegalArgumentException("Error: Invalid input for debug level");
@@ -169,7 +168,7 @@ public class GeneBankCreateBTree {
                 }
                 if (args.length == 6) {
                     try {
-                        if(Integer.parseInt(args[4]) < 1){
+                        if (Integer.parseInt(args[4]) < 1) {
                             throw new IllegalArgumentException("Error: Invalid input for cache size");
                         }
                     } catch (NumberFormatException e) {
