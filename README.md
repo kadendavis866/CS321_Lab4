@@ -57,6 +57,15 @@ of information so that it can be queried. The BTree is effective at storing so m
 very short height compared to other tree data structures, such as the binary search tree. Since the time it takes to add and 
 search a tree data structure is based on the height of a tree, a shorter height makes for efficient operations.
 
+When working with such a large amount of data, saving memory is also a concern. To make our BTree take up less memory, we convert 
+the input into a binary form before storing it in the BTree. Since there are only four different chemical bases that make up DNA, 
+we only have four possible strings that we will be storing in our BTree. This is convenient because we can represent each of the 
+bases as a two-digit binary number, which reduces the memory that each character uses from 1 byte (an ASCII character) to 2 bits. 
+Since we are storing these characters in sequences, we can group them together using the "long" primitive data type. A long has 64 
+bits of storage, but one bit is reserved for the sign of the number so we can store up to 31 DNA bases in a single long. For this 
+reason, the maximum allowed sequence length *k* for this project is 31.
+
+
 TESTING:
 
 This program was primarily tested by comparing out output to the example outpus that were provided to us. Once our output matched
