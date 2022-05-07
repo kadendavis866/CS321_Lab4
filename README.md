@@ -52,7 +52,10 @@ results to a dump file instead.
 PROGRAM DESIGN AND IMPORTANT CONCEPTS:
 
 This program reads in a DNA sequence, breaks them into substrings of a provided length, and writes the substrings into a BTree 
-data structure. 
+data structure. We use a BTree for this project because we need a data structure that can efficiently store a very large amount
+of information so that it can be queried. The BTree is effective at storing so much information because it can be made to have a 
+very short height compared to other tree data structures, such as the binary search tree. Since the time it takes to add and 
+search a tree data structure is based on the height of a tree, a shorter height makes for efficient operations.
 
 TESTING:
 
