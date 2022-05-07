@@ -187,7 +187,7 @@ public class GeneBankSearch {
      *
      * @param bTree BTree to search
      * @param query sequence to search for
-     * @return the frequency of the sequence in the btree
+     * @return the frequency of the sequence in the BTree
      */
     public static int search(BTree bTree, String query) throws IOException {
         TreeObject o = bTree.get(DNAConversion.dnaToLong(query));

@@ -17,7 +17,6 @@ public class DiskReadWrite {
     private int degree;
     private int sequenceLength;
 
-
     /**
      * Initializes a new DiskReadWrite object
      * Creates a new file if necessary

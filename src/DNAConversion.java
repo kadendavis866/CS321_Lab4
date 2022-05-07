@@ -2,6 +2,7 @@
  * Utility class for converting DNA sequences between long and String
  */
 public class DNAConversion {
+
     private static final byte A = 0;
     private static final byte T = 3;
     private static final byte C = 1;

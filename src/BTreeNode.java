@@ -12,7 +12,6 @@ public class BTreeNode {
     protected TreeObject[] keys;
     protected long[] children;
 
-
     /**
      * Constructor, creates a new node for the BTree
      *

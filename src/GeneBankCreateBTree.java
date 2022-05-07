@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.util.Scanner;
 
 /**
- * Driver class for creating a BTree and inserting data from a gbk file containing a DNA sequence
+ * Driver class for creating a BTree and inserting data from a GeneBank file containing a DNA sequence
  */
 public class GeneBankCreateBTree {
-
 
     private final int SEQUENCE_LENGTH;
     private final File sourceFile;
@@ -19,6 +18,7 @@ public class GeneBankCreateBTree {
      * @param sourceFile     gbk file containing the DNA sequence
      * @param sequenceLength length of DNA sequences to store in BTree
      * @param degree         degree of BTree, i.e. minimum number of child nodes
+     *                       input of 0 uses optimal degree based on a disk block size of 4096 bytes
      */
     public GeneBankCreateBTree(File sourceFile, int sequenceLength, int degree) throws IOException {
         this.sourceFile = sourceFile;
@@ -32,6 +32,7 @@ public class GeneBankCreateBTree {
      * @param sourceFile     gbk file containing the DNA sequence
      * @param sequenceLength length of DNA sequences to store in BTree
      * @param degree         degree of BTree, i.e. minimum number of child nodes
+     *                       input of 0 uses optimal degree based on a disk block size of 4096 bytes
      * @param cacheSize      number of objects that can be stored in cache
      */
     public GeneBankCreateBTree(File sourceFile, int sequenceLength, int degree, int cacheSize) throws IOException {
@@ -273,7 +274,6 @@ public class GeneBankCreateBTree {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        //end
     }
 
     /**

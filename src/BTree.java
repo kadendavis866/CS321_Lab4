@@ -79,10 +79,8 @@ public class BTree {
                     root = s;
                     diskrw.setRoot(s.address);
                     splitChild(root, 0);
-                    insertNonFull(root, k);
-                } else {
-                    insertNonFull(root, k);
                 }
+                insertNonFull(root, k);
             } else {
                 object.incrementFrequency();
                 diskrw.updateNode(existingNode);
