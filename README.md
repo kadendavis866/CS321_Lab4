@@ -1,23 +1,26 @@
 ****************
-* BTree Gene-Bank/Lab 04
-* CS321 MinLong
-* Fri May 6 16:47:12 MDT 2022
-* Kaden Davis, Andrew McMains, Andrew Doering
+* Lab 4: Bioinformatics
+* CS321 Min Long
+* Fri May 6 2022
+* Kaden Davis, Drew McMains, Andrew Doering
 **************** 
 
 OVERVIEW:
 
+This project uses a BTree to store substrings of a desired length of a DNA sequence. The BTree can then be queried to find the 
+frequency of various DNA substrings.
+
 INCLUDED FILES:
 
- * BTree.java - Represents a BTree, uses Disk to read and write files
- * GeneBankCreateBTree.java - Driver class to read in and create a BTree from a GBK file
+ * BTree.java - a BTree that uses disk to read and write files
+ * GeneBankCreateBTree.java - driver class to read in and create a BTree from a GeneBank file
  * GeneBankSearch.java - Driver class to query DNA sequences from created BTree file
- * DiskReadWrite.java - logic to read and write nodes onto a disk
- * TreeObject.java - Object to represent one DNA substring, includes frequence and substring (represented by a long datatype)
- * BTreeNode.java - Node of a BTree which holds an array of tree objects and an array of child pointers
- * DNAConversion.java - Logic to convert a DNA sequence of a long and from a long back to a DNA sequence
- * Cache.java - Cache to be used for increase efficiency in BTree 
- * CacheNode.java - Node to be used in the Cache
+ * DiskReadWrite.java - logic to read and write nodes onto the disk
+ * TreeObject.java - object to be stored in the BTree that contains a DNA substring (represented by a long datatype) and frequency
+ * BTreeNode.java - node of the BTree that holds an array of TreeObjects and an array of child pointers
+ * DNAConversion.java - logic to convert a DNA sequence to a long and back to a DNA sequence
+ * Cache.java - cache to be used for increased efficiency in BTree
+ * CacheNode.java - node for the cache
  * README - this file
 
 
@@ -33,40 +36,26 @@ To run GeneBankCreateBTree.java use the following command:
 ```
 java GeneBankCreateBTree <0/1(no/with Cache)> <degree> <gbk file> <sequence length> [<cache size>] [<debug level>]
 ```
-Will create a BTree using provided GBK file sequence length, and tree degree (0 will calcualte tree's 
-optimal degree). 
-The running time of the program will be printed to the console, if debug level 1 is selected, will write all sequences and their
-frequencys to dump file. The BTree will be stored in file with the naming convention <file name\>.gbk.btree.data.<sequence length\>.<degree\>.
+This command will create a BTree using the provided GeneBank file, sequence length, and tree degree (an input of 0 will use the 
+tree's optimal degree). The program will print its runtime to the console, and, if debug level 1 is selected, it will write all 
+DNA substrings and their frequencies to a dump file. The BTree will be stored in a file with the naming convention 
+<file name\>.gbk.btree.data.<sequence length\>.<degree\>.
 
-To run GeneBankSearch.java first run GeneBankCreateBTree to build BTree file,
-then run the command:
+To run GeneBankSearch.java, first use GeneBankCreateBTree.java to build a BTree file, then run the command:
 ```
 java GeneBankSearch <0/1(no/with Cache)> <btree file> <query file> [<cache size>] [<debug level>]
 ```
-This will search the BTree for the provided queries in query file with matching sequence 
-length. This will return the frequency of each of substring to standard out along with the 
-running time of the program. If debug level 1 is selected this will output the results to a 
-dump file.
+This command will search the BTree for the provided queries in the query file with matching sequence length. It prints the 
+results of the queries to the console along with the rumtime of the program. If debug level 1 is selected, it will output the 
+results to a dump file instead. 
 
 PROGRAM DESIGN AND IMPORTANT CONCEPTS:
 
-This program exists to read a DNA sequence, break them into substrings of a provided length and write the substrings into
-a BTree datastructure. 
+This program reads in a DNA sequence, breaks them into substrings of a provided length, and writes the substrings into
+a BTree data structure. 
+
 TESTING:
 
 
 DISCUSSION:
 
-EXTRA CREDIT:
-
- If the project had opportunities for extra credit that you attempted,
- be sure to call it out so the grader does not overlook it.
-
-
-----------------------------------------------------------------------------
-
-All content in a README file is expected to be written in clear English with
-proper grammar, spelling, and punctuation. If you are not a strong writer,
-be sure to get someone else to help you with proofreading. Consider all project
-documentation to be professional writing for your boss and/or potential
-customers.
