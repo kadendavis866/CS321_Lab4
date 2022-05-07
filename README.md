@@ -51,11 +51,16 @@ results to a dump file instead.
 
 PROGRAM DESIGN AND IMPORTANT CONCEPTS:
 
-This program reads in a DNA sequence, breaks them into substrings of a provided length, and writes the substrings into
-a BTree data structure. 
+This program reads in a DNA sequence, breaks them into substrings of a provided length, and writes the substrings into a BTree 
+data structure. 
 
 TESTING:
 
+This program was primarily tested by comparing out output to the example outpus that were provided to us. Once our output matched
+the example output exactly, we were confident that our program was working correctly. We also ran the program with every provided 
+GeneBank file and a variety of settings, making sure to test edge cases such as k = 1 and k = 31. Without an example output file 
+to compare to for these inputs, we just did a quick check of the output to make sure it looks reasonable. There are currently no 
+known bugs in the program.
 
 DISCUSSION:
 
