@@ -59,3 +59,4 @@ TESTING:
 
 DISCUSSION:
 
+A cache was implemented to help improve efficiency of the BTree. When testing with a cache size of 100 creating the btree took an average of .195 seconds among 10 tests, while creating with a cache size of 500 took an average of .176 seconds with 10 tests. While searching the BTree efficiency is also improved when searching using a larger cache. Searching with cache size 500 provides an average of .376 seconds, while size 100 has an average of .46 seconds.Both tests were run searching a BTree of degree 8 and sequence length 6.
