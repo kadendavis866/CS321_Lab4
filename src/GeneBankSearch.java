@@ -138,7 +138,7 @@ public class GeneBankSearch {
                     try {
                         int arg3 = Integer.parseInt(args[3]);
                         if (useCache) {
-                            if (arg3 < 1) {
+                            if (arg3 < 2) {
                                 throw new IllegalArgumentException("Error: Invalid input for cache size");
                             }
                         } else {
