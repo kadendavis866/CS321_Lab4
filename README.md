@@ -65,6 +65,17 @@ Since we are storing these characters in sequences, we can group them together u
 bits of storage, but one bit is reserved for the sign of the number so we can store up to 31 DNA bases in a single long. For this 
 reason, the maximum allowed sequence length *k* for this project is 31.
 
+With BTree containing as much information as they do it is not always efficient to save the data in memory, thus a DISKREADWRITE is 
+used to store the information on the users storage instead of the RAM. To create a BTree from a DNA sequences we read in a GBK file
+with the start of the sequence being denoted with the term "ORIGIN". We then use a "sliding window" method (ignoring N's) to read in
+the subsequences with a provided sequence length. For example the line "AGTCNTACGT" with sequence length 3 would add the substrings, "AGT", 
+"GTC", ... "TAC", "ACG", "CGT". The sequence is read into the BTree using this method (converting the strings to longs) and then saved to 
+the Disk, root node is kept in memory. 
+
+For GeneBankSearch.java the BTree file from GeneBankCreateBTree is used to read in a BTree and then search that tree for specific queries.
+This file verifies that the Query substring length matches with the BTrees length and then uses the BTree's get method to find the 
+frequency of each of the queried substrings.
+
 
 TESTING:
 
@@ -76,4 +87,10 @@ known bugs in the program.
 
 DISCUSSION:
 
-A cache was implemented to help improve efficiency of the BTree. When testing with a cache size of 100 creating the btree took an average of .195 seconds among 10 tests, while creating with a cache size of 500 took an average of .176 seconds with 10 tests. While searching the BTree efficiency is also improved when searching using a larger cache. Searching with cache size 500 provides an average of .376 seconds, while size 100 has an average of .46 seconds.Both tests were run searching a BTree of degree 8 and sequence length 6.
+A cache was implemented to help improve efficiency of the BTree. When testing with a cache size of 100 creating the btree took an average of 
+.195 seconds among 10 tests, while creating  with a cache size of 500 took an average of .176 seconds with 10 tests. While searching the BTree 
+efficiency is also improved when searching using a larger cache. Searching with cache size 500 provides an average of .376 seconds, while size 
+100 has an average of .46 seconds.Both tests were run searching a BTree of degree 8 and sequence length 6. Using a cache at all greatly reduces 
+the time the program take to run, using a cache of size 500 vs no cache for creating a BTree resulted in a 51% improvement from .34 seconds 
+to .17 seconds.
+
