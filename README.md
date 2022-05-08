@@ -1,7 +1,7 @@
 ****************
 * Lab 4: Bioinformatics
 * CS321 Min Long
-* Fri May 7 2022
+* May 7 2022
 * Kaden Davis, Drew McMains, Andrew Doering
 **************** 
 
@@ -65,17 +65,16 @@ Since we are storing these characters in sequences, we can group them together u
 bits of storage, but one bit is reserved for the sign of the number so we can store up to 31 DNA bases in a single long. For this 
 reason, the maximum allowed sequence length *k* for this project is 31.
 
-With BTree containing as much information as they do it is not always efficient to save the data in memory, thus a DISKREADWRITE is 
+With BTree containing as much information as they do, it is not always efficient to save the data in memory, thus a DISKREADWRITE is 
 used to store the information on the users storage instead of the RAM. To create a BTree from a DNA sequences we read in a GBK file
-with the start of the sequence being denoted with the term "ORIGIN". We then use a "sliding window" method (ignoring N's) to read in
-the subsequences with a provided sequence length. For example the line "AGTCNTACGT" with sequence length 3 would add the substrings, "AGT", 
-"GTC", ... "TAC", "ACG", "CGT". The sequence is read into the BTree using this method (converting the strings to longs) and then saved to 
-the Disk, root node is kept in memory. 
+with the start of the sequence being denoted with the term "ORIGIN". We then use a "sliding window" method (excluding windows with 
+an 'N') to read inthe subsequences with a provided sequence length. For example the line "AGTCNTACGT" with sequence length 3 would 
+add the substrings, "AGT", "GTC", ... "TAC", "ACG", "CGT". The sequence is read into the BTree using this method with the strings 
+converted to longs and then saved to the disk while the root node is kept in memory. 
 
-For GeneBankSearch.java the BTree file from GeneBankCreateBTree is used to read in a BTree and then search that tree for specific queries.
-This file verifies that the Query substring length matches with the BTrees length and then uses the BTree's get method to find the 
-frequency of each of the queried substrings.
-
+For GeneBankSearch.java, the BTree file from GeneBankCreateBTree is used to read in a BTree and then search that tree for specific 
+queries. This file verifies that the query substring length matches with the BTrees length and then uses the BTree's get method to 
+find the frequency of each of the queried substrings.
 
 TESTING:
 
@@ -87,16 +86,16 @@ known bugs in the program.
 
 DISCUSSION:
 
-A cache was implemented to help improve efficiency of the BTree. When testing with a cache size of 100 creating the btree took an average of 
-.195 seconds among 10 tests, while creating  with a cache size of 500 took an average of .176 seconds with 10 tests. While searching the BTree 
-efficiency is also improved when searching using a larger cache. Searching with cache size 500 provides an average of .376 seconds, while size 
-100 has an average of .46 seconds. Both tests were run searching a BTree of degree 8 and sequence length 6. Using a cache at all greatly reduces 
-the time the program take to run, using a cache of size 500 vs no cache for creating a BTree resulted in a 51% improvement from .34 seconds 
-to .17 seconds.
+A cache was implemented to help improve efficiency of the BTree. When testing with a cache size of 100, creating the BTree took an 
+average of 0.195 seconds in 10 tests, while creating  with a cache size of 500 took an average of 0.176 seconds in 10 tests. 
+While searching, the efficiency of the BTree is also improved when searching using a larger cache. Searching with cache size 500 
+provides an average of 0.376 seconds, while size 100 has an average of 0.46 seconds. Both tests were run searching a BTree of degree 
+8 and sequence length 6. Using a cache for all the BTree nodes greatly reduces the time the program take to run. Using a cache of 
+size 500 vs. no cache for creating a BTree cut the runtime in half -- from 0.34 seconds to 0.17 seconds.
 
 For the layout of the BTree on the disk, the BTree metadata was written at the front of the file followed by the list of BTreeNodes.
 The first 8 bytes are an address in the file which points to the root node. The next 4 bytes contain the degree of the BTree.
 Following that are the BTreeNodes which consist of the following: 1 byte to indicate if it is a leaf node, 
-then a list of BTreeNode keys (DNA substrings converted to a 32 bit long), and finally a list of child node addresses(also longs).
-Because we did not implement methods that required a pointer to the parent node, we did not include it in the file in order to save space.
-
+then a list of BTreeNode keys (DNA substrings converted to a 64 bit long), and finally a list of child node addresses (also longs).
+Because we did not implement methods that required a pointer to the parent node, we did not include it in the file in order to save 
+space.
