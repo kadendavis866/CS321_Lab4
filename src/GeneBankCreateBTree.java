@@ -79,8 +79,8 @@ public class GeneBankCreateBTree {
         }
 
         GeneBankCreateBTree treeCreator;
+        File sourceFile = new File(gbkFile);
         try {
-            File sourceFile = new File(gbkFile);
 
             // check if file exists
             if (!(sourceFile.exists() && sourceFile.isFile())) {
@@ -109,7 +109,7 @@ public class GeneBankCreateBTree {
         double timeSeconds = (System.nanoTime() - startTime) / Math.pow(10, 9);
         int timeMinutes = (int) timeSeconds / 60;
         timeSeconds %= 60;
-        System.out.printf("Time elapsed(m:s) %d:%f", timeMinutes, timeSeconds);
+        System.out.printf("BTree created\nSaved to %s\nTime elapsed(m:s) %d:%f\n", sourceFile.getAbsolutePath(),timeMinutes, timeSeconds);
     }
 
     /**

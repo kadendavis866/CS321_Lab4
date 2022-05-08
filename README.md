@@ -1,7 +1,7 @@
 ****************
 * Lab 4: Bioinformatics
 * CS321 Min Long
-* Fri May 6 2022
+* Fri May 7 2022
 * Kaden Davis, Drew McMains, Andrew Doering
 **************** 
 
@@ -18,7 +18,7 @@ INCLUDED FILES:
  * DiskReadWrite.java - logic to read and write nodes onto the disk
  * TreeObject.java - object to be stored in the BTree that contains a DNA substring (represented by a long datatype) and frequency
  * BTreeNode.java - node of the BTree that holds an array of TreeObjects and an array of child pointers
- * DNAConversion.java - logic to convert a DNA sequence to a long and back to a DNA sequence
+ * DNAConversion.java - utility class containing logic to convert a DNA sequence to a long and back to a DNA sequence
  * Cache.java - cache to be used for increased efficiency in BTree
  * CacheNode.java - node for the cache
  * README - this file
@@ -79,7 +79,7 @@ frequency of each of the queried substrings.
 
 TESTING:
 
-This program was primarily tested by comparing out output to the example outpus that were provided to us. Once our output matched
+This program was primarily tested by comparing out output to the example outputs that were provided to us. Once our output matched
 the example output exactly, we were confident that our program was working correctly. We also ran the program with every provided 
 GeneBank file and a variety of settings, making sure to test edge cases such as k = 1 and k = 31. Without an example output file 
 to compare to for these inputs, we just did a quick check of the output to make sure it looks reasonable. There are currently no 
@@ -90,7 +90,13 @@ DISCUSSION:
 A cache was implemented to help improve efficiency of the BTree. When testing with a cache size of 100 creating the btree took an average of 
 .195 seconds among 10 tests, while creating  with a cache size of 500 took an average of .176 seconds with 10 tests. While searching the BTree 
 efficiency is also improved when searching using a larger cache. Searching with cache size 500 provides an average of .376 seconds, while size 
-100 has an average of .46 seconds.Both tests were run searching a BTree of degree 8 and sequence length 6. Using a cache at all greatly reduces 
+100 has an average of .46 seconds. Both tests were run searching a BTree of degree 8 and sequence length 6. Using a cache at all greatly reduces 
 the time the program take to run, using a cache of size 500 vs no cache for creating a BTree resulted in a 51% improvement from .34 seconds 
 to .17 seconds.
+
+For the layout of the BTree on the disk, the BTree metadata was written at the front of the file followed by the list of BTreeNodes.
+The first 8 bytes are an address in the file which points to the root node. The next 4 bytes contain the degree of the BTree.
+Following that are the BTreeNodes which consist of the following: 1 byte to indicate if it is a leaf node, 
+then a list of BTreeNode keys (DNA substrings converted to a 32 bit long), and finally a list of child node addresses(also longs).
+Because we did not implement methods that required a pointer to the parent node, we did not include it in the file in order to save space.
 

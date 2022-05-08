@@ -56,6 +56,9 @@ TESTING:
 
 DISCUSSION:
 
+For the layout of the BTree on disk, the BTree metadata is written at the beginning followed by the BTreeNode data.
+The first 8 bits are a 
+
 EXTRA CREDIT:
 
  If the project had opportunities for extra credit that you attempted,

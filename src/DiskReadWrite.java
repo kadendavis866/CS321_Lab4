@@ -36,7 +36,7 @@ public class DiskReadWrite {
     /**
      * Writes the metadata to the disk.
      * Bytes|     8     |    4     |
-     * |rootAddress|treeDegree|
+     *      |rootAddress|treeDegree|
      *
      * @param rootAddress address of root node
      * @param degree      tree degree
